@@ -18,6 +18,9 @@ library(stats)
 library(cowplot) # mejorar el aspecto de los gráficos
 ```
 
+
+Para esta bitácora se decidió mudar el análisis a otra base de datos (también de reclamos a TSA), pues al revisar con más detalle la anterior, que comprendía datos del periodo 2002-2015, como parte del análisis descriptivo se notó que los datos de la variable más importante para este trabajo, que es *close_amount* (monto final pagado por cada reclamo), no estaba presente del todo a partir del año 2010. Esto marca una inconsistencia ya que al revisar los archivos de TSA para el periodo 2010-2013 se comprobó que los datos para la mencionada variable sí estaban disponibles. Por esta razón, se decidió trabajar con esta segunda base de datos, es decir la que contempla solamente de 2010 a 2013 y en lo sucesivo los análisis se refieren a este periodo de menor duración.
+
 ```{r, echo=F}
 #| output: false
 #| warning: false
@@ -93,9 +96,31 @@ Es importante señalar que en el estudio de [@cyprian] no se realiza ninguna té
 
 Pese a que las técnicas estadísticas implementadas por @cyprian son las tradicionales, a diferencia de los otros estudios mencionados en este apartado, sí se tiene como objetivo escoger las mejores distribuciones para la frecuencia y severidad para nuestro estudio, es prudente seguir una línea de investigación similar a las empleadas en este estudio. El implementar métodos no paramétricos como el de densidades por kernels puede traer complejidades técnicas. Además, el uso de una sola familia en particular como la Poisson-Tweedie tal y como lo expuesto por [@chen2020aggregate] puede limitar la escogencia del mejor modelo que describa de forma apropiada nuestra pregunta de investigación.
 
+
 ## Tablas
 
-```{r}
+En este punto se observa que la variable de mayor interés es *close_amount*, pues corresponde al desembolso efectivo al atender reclamos. Sin embargo, esta variable no es en sí misma útil para implementar los modelos sugeridos, sino que se tienen que construir los datos de frecuencia y severidad de los reclamos a TSA. Siguiendo a @flores y @chen2020aggregate se realizan dos cambios relevantes a este respecto. El primero consiste en filtrar la base de datos para conservar solamente aquellas observaciones en que efectivamente hubo un desembolso al atender el reclamo. Para esto se utiliza la variable *disposition*, que corresponde al estado de resolución del reclamo e indica si el reclamo fue denegado, si se pagó por completo el monto solicitado (aprobado) o si se llegó a un acuerdo (acordado) y se pagó solamente una fracción del monto del reclamo. En la @tbl-conteo_disposition se muestra la frecuencia de cada estado de resolución. Consecuentemente, al filtrar las observaciones se pasa de 41 598 observaciones a 12 743
+
+```{r, echo=FALSE}
+#| tbl-cap: "Conteo de reclamos por estado de resolución"
+#| label: tbl-conteo_disposition
+
+tabla <- table(datos$disposition)
+
+names(tabla) <- c("Desconocido", "Aprobado", "Denegado", "Acordado")
+
+t(tabla) %>%  kbl(digits = 2) %>%
+  kable_styling() %>%
+  kable_classic_2(full_width = T) %>% 
+   row_spec(0, bold = T)
+
+```
+
+El segundo paso se refiere propiamente a la construcción de los datos de frecuencia y severidad. Esto se realiza agregando los datos ya filtrados de forma mensual. Para el caso de la frecuencia, esto se traduce en el conteo de reclamos en cada mes. Como el periodo de estudio comprende cuatro años (de 2010 a 2013), entonces se extraen 48 conteos ($4\times 12$). Ahora bien, para el caso de la severidad, esto se hace de forma similar solo que sumando los montos finales (*close_amount*) de los reclamos en cada mes, obteniéndose 48 valores para la severidad; por ejemplo, el primer valor de la severidad corresponde al monto total pagado por concepto de reclamos a TSA durante enero de 2010.
+
+En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derechay que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
+
+```{r, message=FALSE, warning=FALSE}
 #| echo: false
 
 # X: Severidad
@@ -107,6 +132,35 @@ datos_agregados <- datos %>% filter(disposition == "Settle" | disposition== "App
 
 datos_agregados <- datos_agregados %>% group_by("ano" = year(date_received), "mes" = month(date_received) ) %>%  summarise(X = sum(close_amount), N = n()) %>% 
   ungroup() %>% mutate(t = c(1:48), .before = X)
+
+
+```
+
+```{r, echo=FALSE}
+#| fig-cap: "Histograma de montos pagados agregados por mes"
+#| label: fig-histograma_severidad
+
+g <- ggplot(datos_agregados, aes(x=X)) 
+g <- g + geom_histogram(colour="black", fill="#40A195", bins=7)
+g <- g + scale_y_continuous(breaks = seq(0,22,2))
+g <- g + scale_x_continuous(breaks = seq(5000,125000, 15000))
+g <- g + labs(x = "Monto pagado",
+              y = "Frecuencia",
+              caption = "Fuente: Elaboración propia con datos de TSA")
+
+g <- g + theme_cowplot()
+
+g
+
+```
+
+
+En la @tbl-medidas_severidad_frecuencia se muestran algunas estadísticas de los datos de frecuencia y severidad. Sorprende principalmente la asimetría obtenida para la severidad, que marca una discrepancia con los resultados obtenidos tanto por @flores como por @chen2020aggregate, dado que ambos autores presentan coeficientes de asimetría positivos, sin embargo, debe tenerse en cuenta que el primero utiliza datos del período 2003-2015 (desagregados además por sitio y tipo) y el segundo del período 2008-2012. De la @fig-histograma_severidad ya se observaba que no hay una asimetría positiva marcada en la severidad.
+
+
+```{r, echo=FALSE}
+#| tbl-cap: "Medidas estadísticas de resumen para la severidad y la frecuencia"
+#| label: tbl-medidas_severidad_frecuencia
 
 medidas <- function(x){
   r <- summary(x) %>% as.vector()
@@ -126,29 +180,25 @@ nombres <- c("Mínimo",
              "Asimetría",
              "Curtosis")
 
-tabla <- medidas(datos_agregados$X)
+tabla <- cbind(medidas(datos_agregados$N), medidas(datos_agregados$X))
+
 rownames(tabla) <- nombres
-colnames(tabla) <- "Valor"
-
-```
-
-```{r}
-#| tbl-cap: "Resumen"
-#| label: tbl-resumen
-#| echo: false
+colnames(tabla) <- c("Frecuencia", "Severidad")
 
 tabla %>%  kbl(digits = 2) %>%
   kable_styling() %>%
-  kable_classic_2(full_width = T) %>% 
-   row_spec(0, bold = T)
+  kable_classic_2(full_width = F) %>% 
+   row_spec(0, bold = T) %>% 
+  column_spec(c(1,2,3), width = "2cm") %>%
+    column_spec(1, bold = T) %>% t()
+
 ```
 
-```{r}
+
+```{r echo=FALSE}
+#| echo: false
 #| tbl-cap: "Severidad promedio mensual"
 #| label: tbl-severidadpromedio
-#| echo: false
-
-
 
 df1 <- datos_agregados %>% group_by( mes ) %>%
   summarise(es = mean(X, na.rm = TRUE))
@@ -158,9 +208,10 @@ kable(df1) %>% kable_styling(full_width = FALSE)
 ```
 
 ```{r}
+#| echo: false
 #| tbl-cap: "Frecuencia por tipo de reclamo"
 #| label: tbl-tiporeclamo
-#| echo: false
+
 
 df2 <- datos %>% group_by( claim_type ) %>% summarise(n = n())
 colnames(df2) <- c("Tipo de reclamo", "Ocurrencias")
@@ -295,14 +346,27 @@ descdist( datos_agregados$X, discrete=FALSE, boot=1000)
 
 -   Resumen en un párrafo: El número de reclamos mensuales parece hacer incrementado rápidamente poco tiempo de abrirse el TSA. Esto se podría explicar por la poca experiencia en materia de chequeos y procedimientoslo que posiblemente causó problemas mala práctica con los pasajeros. Sin embargo, luego de alcanzarse un máximo, este comportamiento cambia a un decrecimiento desde entonces. Esto se debe a que probablemente el TSA se ha vuelto mejor con el manejo de los chequeos. Esta tendencia puede ser un problema porque en la literatura se expresó que puede complicar el proceso de ajustar una distribución a los reclamos, notando que al eliminar esta tendencia se facilitaba esta búsqueda.
 
+
 2).
 
--   Nombre de su hallazgo/resultado: Asimetría de los montos pagados
+-   Nombre de su hallazgo/resultado: Asimetría negativa de la severidad 
 
--   Resumen en una oración: Los montos pagados presentan un comportamiento asimétrico.
+-   Resumen en una oración: La distribución de la severidad está ligeramente sesgada hacia la derecha, según lo indica un valor negativo del coeficiente de asimetría.
 
--   Principal característica: La asimetría es positiva.
+-   Principal característica: El coeficiente de asimetría es negativo.
 
--   Problemas o posibles desafíos:
+-   Problemas o posibles desafíos: Esta característica es contrastante respecto de los resultados obtenidos por autores que han utilizado datos de reclamos a TSA, donde la asimetría positiva era muy marcada tanto numérica como visualmente y probalemente signifique que las distribuciones a emplear en el presente trabajo para ajustar la severidad sean muy distintas de las ya estudiadas.
 
--   Resumen en un párrafo:
+-   Resumen en un párrafo: La distribución de la severidad está ligeramente sesgada hacia la derecha, según lo indica un valor bajo pero negativo del coeficiente de asimetría en la @tbl-medidas_severidad_frecuencia. Del histograma en la @fig-histograma_severidad ya se observaba que la distribución de la severidad agregada por mes no es claramente sesgada hacia la izquierda. Esta característica sorprende y marca una diferencia notable respecto de los resultados obtenidos por autores que han utilizado datos de reclamos a TSA, como en los trabajos de @flores y @chen2020aggregate, donde la asimetría positiva era muy marcada tanto numérica como visualmente y probalemente signifique que las distribuciones a emplear en el presente trabajo para ajustar la severidad sean muy distintas de las ya estudiadas.
+
+
+## Parte de reflexión
+
+En la @fig-UVE2 se muestra la UVE heurística actualizada, donde se incluyen las transformaciones sobre los datos para obtener los datos mensuales de frecuencia y severidad.
+
+![Actualización de de la UVE Heurística](Images/UVE Maik 2.png){#fig-UVE2 fig-align="center" width="600"}
+
+
+En cuanto a las preguntas surgidas, sin duda el punto más sorpresivo consiste en la discordancia de la asimetría hallada para la distribución empírica de la severidad en contraste con los resultados expuestos por @flores y @chen2020aggregate, quienes realizaron la agregación de la severidad de forma mensual y trabajaron con datos de reclamos a TSA pero para periodos distintos, hallando una marcada asimetría positiva. De esta manera, surge la duda de a qué puede obedecer esta diferencia, aunque debe tenerse en cuenta que contestar esta pregunta no es el objetivo de la presente investigación.
+
+
