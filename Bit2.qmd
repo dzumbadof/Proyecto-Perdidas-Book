@@ -37,12 +37,15 @@ attach(datos)
 
 ## Ordenamiento de la literatura
 
-```{r, echo=F}
+```{r}
+#| tbl-cap: Ordenamiento de la literatura
+#| label: tbl-ordenamiento
+#| echo: false
 
 tabla <- read_excel("Archivos auxiliares/Ordenamiento de la literatura.xlsx")
 
 tabla %>%
-  kbl(caption = "Ordenamiento de la literautra") %>%
+  kbl() %>%
   kable_styling() %>%
   kable_classic_2(full_width = T) %>% 
    row_spec(0, bold = T)
@@ -93,7 +96,7 @@ Pese a que las técnicas estadísticas implementadas por @cyprian son las tradic
 ## Tablas
 
 ```{r}
-
+#| echo: false
 
 # X: Severidad
 # N: Frecuencia
@@ -127,22 +130,23 @@ tabla <- medidas(datos_agregados$X)
 rownames(tabla) <- nombres
 colnames(tabla) <- "Valor"
 
-tabla %>%  kbl(caption = "Medidas de resumen", digits = 2) %>%
-  kable_styling() %>%
-  kable_classic_2(full_width = T) %>% 
-   row_spec(0, bold = T)
-
 ```
 
 ```{r}
+#| tbl-cap: "Resumen"
+#| label: tbl-resumen
+#| echo: false
 
-tabla %>%  kbl(caption = "Medidas de resumen", digits = 2) %>%
+tabla %>%  kbl(digits = 2) %>%
   kable_styling() %>%
   kable_classic_2(full_width = T) %>% 
    row_spec(0, bold = T)
 ```
 
 ```{r}
+#| tbl-cap: "Severidad promedio mensual"
+#| label: tbl-severidadpromedio
+#| echo: false
 
 
 
@@ -154,8 +158,9 @@ kable(df1) %>% kable_styling(full_width = FALSE)
 ```
 
 ```{r}
-#| tbl-cap: "Hola"
-#| label: tbl-reclamos
+#| tbl-cap: "Frecuencia por tipo de reclamo"
+#| label: tbl-tiporeclamo
+#| echo: false
 
 df2 <- datos %>% group_by( claim_type ) %>% summarise(n = n())
 colnames(df2) <- c("Tipo de reclamo", "Ocurrencias")
@@ -163,12 +168,13 @@ colnames(df2) <- c("Tipo de reclamo", "Ocurrencias")
 kable(df2) %>% kable_styling(full_width = FALSE)
 ```
 
-Como se ve en @tbl-reclamos
+Como se ve en @tbl-tiporeclamo
 
 ```{r}
-#| eval: false
-#| cap-location: top
-#| fig-cap: "Aerolíneas con mayor conteo de reclamos"
+#| tbl-cap: "Frecuencia de reclamos por aerolínea"
+#| label: tbl-aerolinea
+#| echo: false
+
 
  dfConteoAerolineas <- datos %>% group_by( airline_name ) %>% summarise(n = n())
 #Se ordena segun cantidad de conteos.
@@ -188,7 +194,8 @@ colnames( dfConteoAerolineas ) <- c("Aerolínea ", "Ocurrencias")
 
 ```{r}
 #| fig-cap: "Número de reclamos mensuales del 2010 al 2013"
-#| fig-cap-location: top
+#| label: fig-reclamosmensuales
+#| echo: false
 
 
 ggplot(datos_agregados, aes( x=t, y = N)) + geom_point(color='red', size=2) + 
@@ -196,23 +203,11 @@ ggplot(datos_agregados, aes( x=t, y = N)) + geom_point(color='red', size=2) +
   theme_minimal()
 ```
 
-```{r}
-df3 <- datos_agregados %>% mutate(sp = X/N )
-```
 
 ```{r}
-#| cap-location: top
-#| fig-cap: "Severidad promedio mensual entre 2002 y 2015"
-
-ggplot(df3, aes( x=t, y = sp)) + geom_point(color='red', size=2) + 
-  xlab("Tiempo") + ylab("Severidad promedio")+
-  theme_minimal()
-```
-
-```{r}
-
-#| cap-location: top
-#| fig-cap: "Aerolíneas con mayor monto  promedio pagado"
+#| fig-cap: "Aerolíneas con mayor monto promedio pagado"
+#| label: fig-mayormontoaerolineas
+#| echo: false
 
 #En este caso graficamos aquellas 5  aerolineas con  mayor monto pagado promedio 
 
@@ -242,9 +237,9 @@ graficoAerolineasSeveridad <-  graficoAerolineasSeveridad +  theme_cowplot(7) + 
 ```
 
 ```{r}
-
- #| cap-location: top
 #| fig-cap: "Tipos de reclamos con mayor monto  promedio pagado"
+#| label: fig-tiporeclamos
+#| echo: false
 
 #En este caso graficamos aquellas 5 tipos de reclamo con  mayor monto pagado promedio 
 
