@@ -118,7 +118,7 @@ t(tabla) %>%  kbl(digits = 2) %>%
 
 El segundo paso se refiere propiamente a la construcción de los datos de frecuencia y severidad. Esto se realiza agregando los datos ya filtrados de forma mensual. Para el caso de la frecuencia, esto se traduce en el conteo de reclamos en cada mes. Como el periodo de estudio comprende cuatro años (de 2010 a 2013), entonces se extraen 48 conteos ($4\times 12$). Ahora bien, para el caso de la severidad, esto se hace de forma similar solo que sumando los montos finales (*close_amount*) de los reclamos en cada mes, obteniéndose 48 valores para la severidad; por ejemplo, el primer valor de la severidad corresponde al monto total pagado por concepto de reclamos a TSA durante enero de 2010.
 
-En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derechay que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
+En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derecha y que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
 
 ```{r, message=FALSE, warning=FALSE}
 #| echo: false
@@ -219,7 +219,8 @@ colnames(df2) <- c("Tipo de reclamo", "Ocurrencias")
 kable(df2) %>% kable_styling(full_width = FALSE)
 ```
 
-Como se ve en @tbl-tiporeclamo
+En @tbl-aerolinea Se observa el número de ocurrencias por aerolínea, esto es, el cantidad de reclamos según la aerolínea en la que viajaba la persona que realizó el reclamo. Se tiene que la *Delta Air Lines* es la presenta mayor cantidad de reclamos reportados, seguidas de *Southwest Airlines* y *American Airlines*, esto es un comportamiento esperable ya que son aerolíneas líderes de mercado y por ende presentan mayor cantidad de viajeros y esto influye en la cantidad de reclamos.   
+ 
 
 ```{r}
 #| tbl-cap: "Frecuencia de reclamos por aerolínea"
@@ -233,7 +234,7 @@ dfConteoAerolineas <-  dfConteoAerolineas[order(dfConteoAerolineas$n, decreasing
 
 #Se toman las 10 Aerolíneas con mayor conteo de reclamos.
  
- dfConteoAerolineas <- dfConteoAerolineas[1:6,]
+ dfConteoAerolineas <- dfConteoAerolineas[1:11,]
 
  dfConteoAerolineas <- dfConteoAerolineas[-5,]
 colnames( dfConteoAerolineas ) <- c("Aerolínea ", "Ocurrencias")
@@ -358,6 +359,25 @@ descdist( datos_agregados$X, discrete=FALSE, boot=1000)
 -   Problemas o posibles desafíos: Esta característica es contrastante respecto de los resultados obtenidos por autores que han utilizado datos de reclamos a TSA, donde la asimetría positiva era muy marcada tanto numérica como visualmente y probalemente signifique que las distribuciones a emplear en el presente trabajo para ajustar la severidad sean muy distintas de las ya estudiadas.
 
 -   Resumen en un párrafo: La distribución de la severidad está ligeramente sesgada hacia la derecha, según lo indica un valor bajo pero negativo del coeficiente de asimetría en la @tbl-medidas_severidad_frecuencia. Del histograma en la @fig-histograma_severidad ya se observaba que la distribución de la severidad agregada por mes no es claramente sesgada hacia la izquierda. Esta característica sorprende y marca una diferencia notable respecto de los resultados obtenidos por autores que han utilizado datos de reclamos a TSA, como en los trabajos de @flores y @chen2020aggregate, donde la asimetría positiva era muy marcada tanto numérica como visualmente y probalemente signifique que las distribuciones a emplear en el presente trabajo para ajustar la severidad sean muy distintas de las ya estudiadas.
+
+3). 
+
+-   Nombre de su hallazgo/resultado: Variables de estudio secundarias con mayor monto promedio pagado.
+
+-   Resumen en una oración: Existen variables secundarias de nuestros estudio que tienen alto impacto implícito  en la severidad de los montos promedio pagados, estas son:tipo de reclamo y aerolíneas. Donde el tipo de reclamo con mayor monto promedio es  *motor vehicule* y para el caso de la aerolínea es *Western Pacific Airlines Inc Westpac*.
+
+-   Principal característica:Pese a que las variables principales para nuestro estudio son la frecuencia de reclamos y la severidad de estos. Existen variables secundarias que implícitamente tienen alto impacto en las mencionadas variables principales.
+
+-   Problemas o posibles desafíos:Existen observaciones donde no se reporta tanto la aerolínea como el tipo de reclamo por lo que solo se contemplan para el monto promedio de pago aquellas observaciones donde si se registran la información de las variables tipo de reclamo y aerolínea.  
+
+-   Resumen en un párrafo:
+
+Hay en particular dos variables secundarias altamente ligadas a la severidad para nuestro estudio, estas variables son: Tipo de reclamo y la aerolínea en la que viajaba la persona.
+  
+Es importante saber cuales son aquellos tipos de reclamo con mayor monto promedio pagado, como se observa en el @fig-tiporeclamos, el reclamo por *motor vehicule* y *personal injury* son aquellos que presentan mayor severidad, seguido de un subgrupo donde el monto de reclamo es menor como lo son: *employee loss* y *bus terminal*. 
+  
+Análogamente, para el caso de las aerolíneas a las que pertenecen las personas que reportan mayor monto promedio pagado, se observa en el @fig-mayormontoaerolineas que *Western Pacific Airlines Inc Westpac* es la que presenta mayor monto promedio, seguido de *Air Pacific*.
+
 
 
 ## Parte de reflexión
