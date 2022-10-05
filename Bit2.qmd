@@ -1,0 +1,311 @@
+# Bitácora 2
+
+```{r echo=FALSE}
+#| output: false
+library(readxl)
+library(kableExtra)
+library(readr)
+library(dplyr)
+library(janitor) # función clean_names()
+library(magrittr) # función %<>%
+library(stringr) # función str_replace
+library(lubridate)
+library(PerformanceAnalytics) # funciones skewness y kurtosis
+library(ggplot2)
+library(actuar)
+library(fitdistrplus)
+library(stats)
+library(cowplot) # mejorar el aspecto de los gráficos
+```
+
+```{r, echo=F}
+#| output: false
+#| warning: false
+
+# Se cargan y depuran los datos
+
+datos <- read_excel("claims-2010-2013.xlsx") %>%
+  clean_names() # se limpian nombres columnas
+
+datos <- datos %>% mutate(date_received = ymd(date_received),
+                      close_amount = as.numeric(gsub("\\$", "", close_amount)))
+
+# Se fija la base de datos
+
+attach(datos)
+```
+
+## Ordenamiento de la literatura
+
+```{r, echo=F}
+
+tabla <- read_excel("Archivos auxiliares/Ordenamiento de la literatura.xlsx")
+
+tabla %>%
+  kbl(caption = "Ordenamiento de la literautra") %>%
+  kable_styling() %>%
+  kable_classic_2(full_width = T) %>% 
+   row_spec(0, bold = T)
+
+rm(tabla)
+```
+
+\newpage
+
+## Enlaces de la literatura
+
+En @Flores se establece el procedimiento base para conseguir las distribución agregada al igual que algunos hallazgos y metodologías que son de alta utilidad. Primero la agregación de los datos se hace mensualmente con suma para la severidad y por frecuencia para los reclamos. El autor nota que hay un tendencia negativa de la frecuencia y severidad con respecto al tiempo por lo que procede a eliminarla. Luego, determina la mejor distribución para cada variable utilizando estimación de máxima verosimilitud (MLE). Se encuentra que la binomial negativa se ajusta mejor a las frecuencias. Por otro lado, la Log-Laplace se ajusta mejor a los reclamos por daños a la propiedad y la lognormal se ajusta mejor a los reclamos por pérdidas de los bienes, por lo que se utilizan estas dos para modelar la severidad. Durante este proceso el autor nota que la eliminación de la tendencia facilita el proceso de ajustar una distribución a la frecuencia y la severidad. Finalmente, las cópulas multivariadas se comparan utilizando log_añoverosimilitud y se obtiene que las cópulas elípticas (Gaussiana y t-Student) se ajustan mejor que las arquimedianas (Clayton y Gumbel).
+
+En un estudio similar, @pitt2011estimation utilizan datos de costos de reclamos hechos a una aseguradora española por accidentes ocurridos en el año 2000 y recopilados en 2002, que incluye tanto los ligados a costos por daños a la propiedad como por costos médicos. El tamaño de muestra es de 518 reclamos. Al igual que el estudio anterior, para estimar la densidad para cada uno de los costos (daños a la propiedad y médicos) se utilizan métodos paramétricos como las aproximaciones normales y log-normales. En contraste al estudio pasado también recurren a estimadores no paramétricos como la aproximación por kernels modificada, donde la modificación consiste en que primero se aplica una transformación a los datos originales para corregir la asimetría, se hace una aproximación con un kernel gaussiano a los datos modificados, y luego se calcula la aproximación de los datos originales a partir de la calculada para los modificados. La transformación aplicada a los datos se enmarca en la *shifted power transformation family*.
+
+Adicionalmente, los mismos autores exponen métodos para evaluar la bondad de ajuste de las distribuciones encontradas. Para evaluar todas las estimaciones propuestas se utiliza la log-verosimilitud, tanto la versión clásica como modificaciones ponderadas, mientras que para evaluar solamente los métodos no paramétricos se usan distintas versiones de una aproximación a errores cuadráticos integrados ponderados. Se concluye que la log-verosimilitud no es una buena medida de bondad de ajuste para comparar los ajustes no paramétricos, debido a su relación inversa con la magnitud del ancho de banda empleado. En general, de las propuestas paramétricas, la log-normal tuvo un mejor desempeño, el cual es un hallazgo que concuerda con el de @Flores, mientras que la estimación por kernel modificada tuvo un desempeño adecuado y se recomienda para modelar distribuciones con colas pesadas.
+
+El modelado de pérdidas agregadas es una técnica estadística ampliamente utilizada en el ámbito actuarial, cuyo objetivo es la obtención de una función de distribución de perdidas agregadas, a partir de la distribución de frecuencia de reclamos, y de la distribución de la severidad de estos.
+
+Un claro ejemplo de la implementación de esta técnica es el estudio realizado por [@chen2020aggregate] . La principal motivación de este estudio es la de modelar la frecuencia de las pérdidas mediante el uso de la familia de distribuciones Poisson-Tweedie con la finalidad de modelar la frecuencia de las perdidas y ver el impacto que tiene este sobre el modelo de pérdidas agregadas.
+
+Esto bajo el argumento que dichas familias presentan características como: el ajuste de la frecuencia de pérdidas es más flexible , reducen la posibilidad de una especificación errónea del modelo y dichas familias presentan una convolución cerrada.
+
+Mediante el uso de la distribución de la familia Poisson-Tweedie y el estudio de simulación basados en: Percentil de la distribución de pérdidas agregadas bajo diferentes distribuciones de frecuencia de pérdidas (diferentes valores del parámetros de la familia ) y la investigación de estimadores de parámetros para frecuencia de pérdidas vía simulaciones de Monte Carlo, se investiga y encuentra el impacto de una mala especificación de la distribución perdida de la frecuencia al cuantil de pérdida agregadas, así como el sesgo del estimador de máxima verosimilitud del índice de la familia de Poisson-Tweedie.
+
+Una de las principales diferencias de los métodos implementados en el estudio realizado por [@chen2020aggregate] es el uso de máxima verosimilitud y la implementación de simulaciones vía Monte Carlo. A diferencia de los métodos empleados por [@pitt2011estimation] donde su estudio se centra en la comparación entre métodos paramétricos tradicionales, y métodos no paramétricos basados en la estimación de densidades por Kernels modificados.
+
+No obstante, pese a que según [@pitt2011estimation] se logra estimar de forma adecuada la distribución tanto de costos médicos como de reclamos en seguros de automóviles, los métodos clásicos de estimación de densidades por kernels suelen ser inadecuados en presencia de asimetría, siendo esto habitual en datos de montos de reclamos.
+
+Pese a que el método de estimación de densidades por kernels es técnicamente más sencillo que la implementación de los métodos utilizados por [@chen2020aggregate] , es importante tomar en consideración los problemas presentes en el estudio realizados por [@pitt2011estimation] , ya que pueden generar dificultades técnicas importantes.
+
+Además, el uso de máxima verosimitud por parte de [@chen2020aggregate] para la escogencia de los parámetros es un método de uso más frecuente, para resolver problemas de esta índole.
+
+Sin embargo, debido al enfoque de hace uso de una familia particular para modelar la frecuencia.No obstante, es importante señalar que existen test y pruebas especificas para escoger las distribuciones más adecuadas dada la base de datos de un estudio en particular. Estas técnicas estadísticas para la escogencia de las mejores distribuciones tanto de a frecuencia como la severidad son empleadas por [@cyprian] .
+
+[@cyprian] hace uso de tres bases de seguros de automóviles gratuitas en R (AutoCollision, dataCar, dataOhlsson), en su estudio propone el modelado de la severidad mediante distribuciones continuas (Exponencial, Gamma, Pareto, Lognormal y Weibull) y discretas (Binomial, Geométrica, Binomial Negativa, Poisson) para el caso de la frecuencia, donde los parámetros se estiman vía máxima verosimilitud y los ajustes se miden con pruebas chi cuadrado (para la frecuencia) , Kolmogorov-Smirnov y Anderson-Darling_año(para la severidad).
+
+Una vez obtenidos los parámetros y realizadas las pruebas de ajuste, se seleccionan los modelos de acuerdo a sus medidas del Criterio de Información de Akaike (AIC) AIC y el Criterio de Información Bayesiano (BIC).
+
+Se concluye que la distribución que constituye el mejor modelo para la severidad es la lognormal, mientras que en cuanto a la frecuencia, las más adecuadas son la binomial negativa y la geométrica.
+
+A diferencia del estudio realizado por [@cyprian] en el cual usa conjuntamente métodos paramétricos y no paramétricos con el objetivo de compara estos, en este caso [@cyprian] se enfoca en utilizar un método paramétrico ampliamente utilizado como lo es la estimación de parámetros vía máxima verosimilitud.Sin embargo, se enfoca en implementar una gran variedad de pruebas, test y métricas para obtener las mejores distribuciones posibles tanto de la frecuencia como la severidad.
+
+Es importante señalar que en el estudio de [@cyprian] no se realiza ninguna técnica para encontrar una distribución de perdidas agregadas, a diferencia del estudio de [@chen2020aggregate] donde si construyen esta distribución agregada.
+
+Pese a que las técnicas estadísticas implementadas por @cyprian son las tradicionales, a diferencia de los otros estudios mencionados en este apartado, sí se tiene como objetivo escoger las mejores distribuciones para la frecuencia y severidad para nuestro estudio, es prudente seguir una línea de investigación similar a las empleadas en este estudio. El implementar métodos no paramétricos como el de densidades por kernels puede traer complejidades técnicas. Además, el uso de una sola familia en particular como la Poisson-Tweedie tal y como lo expuesto por [@chen2020aggregate] puede limitar la escogencia del mejor modelo que describa de forma apropiada nuestra pregunta de investigación.
+
+## Tablas
+
+```{r}
+
+
+# X: Severidad
+# N: Frecuencia
+
+# Se filtran los reclamos aprobados o en los que se llegó a un acuerdo
+
+datos_agregados <- datos %>% filter(disposition == "Settle" | disposition== "Approve in Full")
+
+datos_agregados <- datos_agregados %>% group_by("ano" = year(date_received), "mes" = month(date_received) ) %>%  summarise(X = sum(close_amount), N = n()) %>% 
+  ungroup() %>% mutate(t = c(1:48), .before = X)
+
+medidas <- function(x){
+  r <- summary(x) %>% as.vector()
+  temp <- data.frame(c(r, sd(x), IQR(x),skewness(x), kurtosis(x)))
+  return(temp)
+}
+
+
+nombres <- c("Mínimo",
+             "Primer cuartil",
+             "Mediana",
+             "Media",
+             "Tercer cuartil",
+             "Máximo",
+             "Desviación estándar",
+             "Rango intercuartil",
+             "Asimetría",
+             "Curtosis")
+
+tabla <- medidas(datos_agregados$X)
+rownames(tabla) <- nombres
+colnames(tabla) <- "Valor"
+
+tabla %>%  kbl(caption = "Medidas de resumen", digits = 2) %>%
+  kable_styling() %>%
+  kable_classic_2(full_width = T) %>% 
+   row_spec(0, bold = T)
+
+```
+
+```{r}
+
+tabla %>%  kbl(caption = "Medidas de resumen", digits = 2) %>%
+  kable_styling() %>%
+  kable_classic_2(full_width = T) %>% 
+   row_spec(0, bold = T)
+```
+
+```{r}
+
+
+
+df1 <- datos_agregados %>% group_by( mes ) %>%
+  summarise(es = mean(X, na.rm = TRUE))
+colnames(df1) <- c("Mes", "Severidad promedio")
+
+kable(df1) %>% kable_styling(full_width = FALSE)
+```
+
+```{r}
+#| tbl-cap: "Hola"
+#| label: tbl-reclamos
+
+df2 <- datos %>% group_by( claim_type ) %>% summarise(n = n())
+colnames(df2) <- c("Tipo de reclamo", "Ocurrencias")
+
+kable(df2) %>% kable_styling(full_width = FALSE)
+```
+
+Como se ve en @tbl-reclamos
+
+```{r}
+#| eval: false
+#| cap-location: top
+#| fig-cap: "Aerolíneas con mayor conteo de reclamos"
+
+# dfConteoAerolineas <- datos %>% group_by( airline_name ) %>% summarise(n = n())
+# #Se ordena segun cantidad de conteos.
+# dfConteoAerolineas <-  dfConteoAerolineas[order(dfConteoAerolineas$n, decreasing_año= T), ]
+# 
+# #Se toman las 10 Aerolíneas con mayor conteo de reclamos.
+# 
+# dfConteoAerolineas <- dfConteoAerolineas[2:11,]
+# 
+# 
+# colnames( dfConteoAerolineas ) <- c("Aerolínea ", "Ocurrencias")
+# 
+# kable(dfConteoAerolineas) %>% kable_styling(full_width = FALSE)
+```
+
+## Gráficos
+
+```{r}
+#| fig-cap: "Número de reclamos mensuales del 2010 al 2013"
+#| fig-cap-location: top
+
+
+ggplot(datos_agregados, aes( x=t, y = N)) + geom_point(color='red', size=2) + 
+  xlab("Tiempo") + ylab("Reclamos")+
+  theme_minimal()
+```
+
+```{r}
+df3 <- datos_agregados %>% mutate(sp = X/N )
+```
+
+```{r}
+#| cap-location: top
+#| fig-cap: "Severidad promedio mensual entre 2002 y 2015"
+
+ggplot(df3, aes( x=t, y = sp)) + geom_point(color='red', size=2) + 
+  xlab("Tiempo") + ylab("Severidad promedio")+
+  theme_minimal()
+```
+
+```{r}
+#| eval: false
+
+#En este caso graficamos aquellas 5  aerolineas con  mayor monto pagado promedio 
+
+#  dfAerolineasSeveridad<- datos %>% group_by(airline_name) %>%
+#   summarise(s = mean(close_amount, na.rm = TRUE), conteoReclamos =n())
+# 
+# 
+# #Se ordena de forma descendente por monto total reclamado.
+# dfAerolineasSeveridad <- dfAerolineasSeveridad[order(dfAerolineasSeveridad$s, decreasing_año= T),]
+# #Se toman las 5 aerolineas con mayor monto de reclamos promedio.
+# 
+# dfAerolineasSeveridad <- dfAerolineasSeveridad[2:6,]
+# 
+# 
+# 
+# graficoAerolineasSeveridad <-  ggplot(data = dfAerolineasSeveridad, aes(x= airline_name, y= s , fill= airline_name ) ) + geom_bar(stat="identity") +  labs(y = 'Monto  promedio pagado ', x= "Aerolíneas") + guides(fill = guide_legend(title = "Aerolínea")) + ggtitle("Aerolíneas con mayor monto  promedio pagado ") 
+# 
+# 
+# 
+# 
+# graficoAerolineasSeveridad
+# 
+# 
+# library(cowplot)
+# 
+# graficoAerolineasSeveridad <-  graficoAerolineasSeveridad +  theme_cowplot(8) +  theme(plot.title=element_text(hjust=0.5),
+#           plot.subtitle=element_text(hjust=0.5))
+# 
+#  graficoAerolineasSeveridad
+
+```
+
+```{r}
+#| eval: false
+
+#En este caso graficamos aquellas 5 tipos de reclamo con  mayor monto pagado promedio 
+
+#  dfReclamosSeveridad<- datos %>% group_by(claim_type) %>%
+#   summarise(s = mean(close_amount, na.rm = TRUE), conteoReclamos =n())
+# 
+# 
+# #Se ordena de forma descendente por monto total reclamado.
+# dfReclamosSeveridad <- dfReclamosSeveridad[order(dfReclamosSeveridad$s, decreasing_año= T),]
+# #Se toman las 5 aerolineas con mayor monto de reclamos promedio.
+# 
+# dfReclamosSeveridad <- dfReclamosSeveridad[1:5,]
+# 
+#  dfReclamosSeveridad$claim_type[3] <- "No especifica"
+# 
+# graficoReclamosSeveridad <-  ggplot(data = dfReclamosSeveridad, aes(x= claim_type, y= s , fill= claim_type) ) + geom_bar(stat="identity") +  labs(y = 'Monto promedio pagado ', x= "Tipos de reclamo ") + guides(fill = guide_legend(title = "Tipo de reclamo"))  + ggtitle("Tipos de reclamos con mayor monto  promedio pagado ") 
+# 
+# 
+# 
+# 
+# graficoReclamosSeveridad
+# 
+# 
+# library(cowplot)
+# 
+# graficoReclamosSeveridad <-  graficoReclamosSeveridad +  theme_cowplot(8) + theme(plot.title=element_text(hjust=0.5),
+#           plot.subtitle=element_text(hjust=0.5))
+# 
+#  graficoReclamosSeveridad
+# 
+# 
+
+
+```
+
+```{r}
+descdist( datos_agregados$X, discrete=FALSE, boot=1000)
+```
+
+## Fichas Bibliográficas:
+
+1).
+
+-   Nombre de su hallazgo/resultado: Tendencia negativa de los reclamos
+
+-   Resumen en una oración: El número de reclamos mensuales parece hacer incrementado rápidamente poco tiempo de abrirse el TSA hasta alcanzar y máximo y desde entonces se ha mostrado un comportamiento a la baja de la cantidad de reclamos hechos.
+
+-   Principal característica: Tendencia negativa
+
+-   Problemas o posibles desafíos: En @Flores, se comenta que la existencia de una tendencia en los reclamos puede causar problemas al momento de buscar las distribuciones que se ajusten a los datos.
+
+-   Resumen en un párrafo: El número de reclamos mensuales parece hacer incrementado rápidamente poco tiempo de abrirse el TSA. Esto se podría explicar por la poca experiencia en materia de chequeos y procedimientoslo que posiblemente causó problemas mala práctica con los pasajeros. Sin embargo, luego de alcanzarse un máximo, este comportamiento cambia a un decrecimiento desde entonces. Esto se debe a que probablemente el TSA se ha vuelto mejor con el manejo de los chequeos. Esta tendencia puede ser un problema porque en la literatura se expresó que puede complicar el proceso de ajustar una distribución a los reclamos, notando que al eliminar esta tendencia se facilitaba esta búsqueda.
+
+2).
+
+-   Nombre de su hallazgo/resultado: Asimetría de los montos pagados
+
+-   Resumen en una oración: Los montos pagados presentan un comportamiento asimétrico.
+
+-   Principal característica: La asimetría es positiva.
+
+-   Problemas o posibles desafíos:
+
+-   Resumen en un párrafo:
