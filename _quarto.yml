@@ -11,8 +11,8 @@ book:
     - index.qmd
     - Bit1.qmd
     - Bit2.qmd
-    - Bit3.qmd
-    - Bit4.qmd
+    #- Bit3.qmd
+    #- Bit4.qmd
     - references.qmd
 
 bibliography: references.bib

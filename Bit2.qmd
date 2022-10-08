@@ -60,7 +60,7 @@ rm(tabla)
 
 ## Enlaces de la literatura
 
-En @flores se establece el procedimiento base para conseguir las distribución agregada al igual que algunos hallazgos y metodologías que son de alta utilidad. Primero la agregación de los datos se hace mensualmente con suma para la severidad y por frecuencia para los reclamos. El autor nota que hay un tendencia negativa de la frecuencia y severidad con respecto al tiempo por lo que procede a eliminarla. Luego, determina la mejor distribución para cada variable utilizando estimación de máxima verosimilitud (MLE). Se encuentra que la binomial negativa se ajusta mejor a las frecuencias. Por otro lado, la Log-Laplace se ajusta mejor a los reclamos por daños a la propiedad y la lognormal se ajusta mejor a los reclamos por pérdidas de los bienes, por lo que se utilizan estas dos para modelar la severidad. Durante este proceso el autor nota que la eliminación de la tendencia facilita el proceso de ajustar una distribución a la frecuencia y la severidad. Finalmente, las cópulas multivariadas se comparan utilizando log_añoverosimilitud y se obtiene que las cópulas elípticas (Gaussiana y t-Student) se ajustan mejor que las arquimedianas (Clayton y Gumbel).
+En @flores se establece el procedimiento base para conseguir la distribución agregada al igual que algunos hallazgos y metodologías que son de alta utilidad. Primero la agregación de los datos se hace mensualmente con suma para la severidad y por frecuencia para los reclamos. El autor nota que hay un tendencia negativa de la frecuencia y severidad con respecto al tiempo por lo que procede a eliminarla. Luego, determina la mejor distribución para cada variable utilizando estimación de máxima verosimilitud (MLE). Se encuentra que la binomial negativa se ajusta mejor a las frecuencias. Por otro lado, la Log-Laplace se ajusta mejor a los reclamos por daños a la propiedad y la lognormal se ajusta mejor a los reclamos por pérdidas de los bienes, por lo que se utilizan estas dos para modelar la severidad. Durante este proceso el autor nota que la eliminación de la tendencia facilita el proceso de ajustar una distribución a la frecuencia y la severidad. Finalmente, las cópulas multivariadas se comparan utilizando log_añoverosimilitud y se obtiene que las cópulas elípticas (Gaussiana y t-Student) se ajustan mejor que las arquimedianas (Clayton y Gumbel).
 
 En un estudio similar, @pitt2011estimation utilizan datos de costos de reclamos hechos a una aseguradora española por accidentes ocurridos en el año 2000 y recopilados en 2002, que incluye tanto los ligados a costos por daños a la propiedad como por costos médicos. El tamaño de muestra es de 518 reclamos. Al igual que el estudio anterior, para estimar la densidad para cada uno de los costos (daños a la propiedad y médicos) se utilizan métodos paramétricos como las aproximaciones normales y log-normales. En contraste al estudio pasado también recurren a estimadores no paramétricos como la aproximación por kernels modificada, donde la modificación consiste en que primero se aplica una transformación a los datos originales para corregir la asimetría, se hace una aproximación con un kernel gaussiano a los datos modificados, y luego se calcula la aproximación de los datos originales a partir de la calculada para los modificados. La transformación aplicada a los datos se enmarca en la *shifted power transformation family*.
 
@@ -96,8 +96,26 @@ Es importante señalar que en el estudio de [@cyprian] no se realiza ninguna té
 
 Pese a que las técnicas estadísticas implementadas por @cyprian son las tradicionales, a diferencia de los otros estudios mencionados en este apartado, sí se tiene como objetivo escoger las mejores distribuciones para la frecuencia y severidad para nuestro estudio, es prudente seguir una línea de investigación similar a las empleadas en este estudio. El implementar métodos no paramétricos como el de densidades por kernels puede traer complejidades técnicas. Además, el uso de una sola familia en particular como la Poisson-Tweedie tal y como lo expuesto por [@chen2020aggregate] puede limitar la escogencia del mejor modelo que describa de forma apropiada nuestra pregunta de investigación.
 
+## Análisis Estadístico
 
-## Tablas
+```{r}
+#| tbl-cap: "Primeras cinco filas de la tabla de datos"
+#| label: tbl-headDatos
+#| echo: false
+
+
+  head(datos) %>%
+  kbl(align = rep('r', ncol(head(datos))),
+      format.args = list(big.mark = ' '),booktabs=T) %>% 
+  kable_styling(latex_options = c("striped", "condensed", "scale_down"))  %>%
+  kable_styling(full_width = F) %>% kable_classic_2() %>%
+  row_spec(0,bold=TRUE) %>% 
+  column_spec(1:11, width = "3cm") %>% 
+  scroll_box()
+```
+De la @tbl-headDatos se observa que está en formato tidy ya que cada variable tiene su propia columna (11 variables). Cada fila representa una instancia de un reclamo por lo que cada observación tiene su propia fila. Cada Celda tiene un solo valor. 
+
+
 
 En este punto se observa que la variable de mayor interés es *close_amount*, pues corresponde al desembolso efectivo al atender reclamos. Sin embargo, esta variable no es en sí misma útil para implementar los modelos sugeridos, sino que se tienen que construir los datos de frecuencia y severidad de los reclamos a TSA. Siguiendo a @flores y @chen2020aggregate se realizan dos cambios relevantes a este respecto. El primero consiste en filtrar la base de datos para conservar solamente aquellas observaciones en que efectivamente hubo un desembolso al atender el reclamo. Para esto se utiliza la variable *disposition*, que corresponde al estado de resolución del reclamo e indica si el reclamo fue denegado, si se pagó por completo el monto solicitado (aprobado) o si se llegó a un acuerdo (acordado) y se pagó solamente una fracción del monto del reclamo. En la @tbl-conteo_disposition se muestra la frecuencia de cada estado de resolución. Consecuentemente, al filtrar las observaciones se pasa de 41 598 observaciones a 12 743
 
@@ -118,7 +136,6 @@ t(tabla) %>%  kbl(digits = 2) %>%
 
 El segundo paso se refiere propiamente a la construcción de los datos de frecuencia y severidad. Esto se realiza agregando los datos ya filtrados de forma mensual. Para el caso de la frecuencia, esto se traduce en el conteo de reclamos en cada mes. Como el periodo de estudio comprende cuatro años (de 2010 a 2013), entonces se extraen 48 conteos ($4\times 12$). Ahora bien, para el caso de la severidad, esto se hace de forma similar solo que sumando los montos finales (*close_amount*) de los reclamos en cada mes, obteniéndose 48 valores para la severidad; por ejemplo, el primer valor de la severidad corresponde al monto total pagado por concepto de reclamos a TSA durante enero de 2010.
 
-En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derecha y que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
 
 ```{r, message=FALSE, warning=FALSE}
 #| echo: false
@@ -135,6 +152,8 @@ datos_agregados <- datos_agregados %>% group_by("ano" = year(date_received), "me
 
 
 ```
+
+En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derecha y que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
 
 ```{r, echo=FALSE}
 #| fig-cap: "Histograma de montos pagados agregados por mes"
@@ -194,6 +213,8 @@ tabla %>%  kbl(digits = 2) %>%
 
 ```
 
+En la tabla @tbl-severidadpromedio se observa la severidad promedio por mes codificado como 1 para enero y 12 para diciembre. Se nota que la severidad la relaciona cercanamente con las temporadas altas: severidades más altas en verano del hemisferio norte y Enero. Aparte de eso, la severidad es aproximadamente uniforme en el resto de los meses. 
+
 
 ```{r echo=FALSE}
 #| echo: false
@@ -206,6 +227,8 @@ colnames(df1) <- c("Mes", "Severidad promedio")
 
 kable(df1) %>% kable_styling(full_width = FALSE)
 ```
+
+En la @tbl-tiporeclamo se observa que los dos reclamos desproporcionalmente más frecuentes son los de pérdidas y daños a la propiedad de los pasajeros. 
 
 ```{r}
 #| echo: false
@@ -242,7 +265,7 @@ colnames( dfConteoAerolineas ) <- c("Aerolínea ", "Ocurrencias")
  kable(dfConteoAerolineas) %>% kable_styling(full_width = FALSE)
 ```
 
-## Gráficos
+La @fig-reclamosmensuales muestra el conteo de incidencias menusales entre 2010 y finales del 2013. Se Muestra una tendencia fuerte de incrementeo hasta el mes 40. Esto se puede explicar a partir de que el TSA fue creado en el 2002 y durante su período inicial de funcionamiento se implementaron nuevas prácticas de seguridad en el aeropuerto por lo que los pasajeros y las autoridades tuvieron un período de aprendizaje. Luego del mes 40 se observa una fuerte tendencia de decremento posiblemente porque la población a este punto ya se acostumbró a las nuevas medidas implementadas. Esta tendencia es importante notarla pues @flores comenta que puede dificultar el proceso de ajustarle una distribución. 
 
 ```{r}
 #| fig-cap: "Número de reclamos mensuales del 2010 al 2013"
@@ -329,7 +352,13 @@ graficoReclamosSeveridad
 
 ```
 
+La @fig-descdistSeveridad muestra la relación entre curtosis y asimetría de severidad agregadas mensualemente. Se observa que preliminarmente se aproxima a una logística. 
+
 ```{r}
+#| fig-cap: "Comparación de la curtosis y asimetría de la severidad"
+#| label: fig-descdistSeveridad
+#| echo: false
+
 descdist( datos_agregados$X, discrete=FALSE, boot=1000)
 ```
 
@@ -337,15 +366,16 @@ descdist( datos_agregados$X, discrete=FALSE, boot=1000)
 
 1).
 
--   Nombre de su hallazgo/resultado: Tendencia negativa de los reclamos
+-   Nombre de su hallazgo/resultado: Tendencia en la ocurrencia de reclamos
 
--   Resumen en una oración: El número de reclamos mensuales parece hacer incrementado rápidamente poco tiempo de abrirse el TSA hasta alcanzar y máximo y desde entonces se ha mostrado un comportamiento a la baja de la cantidad de reclamos hechos.
+-   Resumen en una oración: El número de reclamos mensuales incrementa con respecto al tiempo en los primeros 40 meses hasta alcanzar un máximo y desde entonces se ha mostrado un comportamiento a la baja en la cantidad de reclamos hechos.
 
--   Principal característica: Tendencia negativa
+-   Principal característica: Tendencia aparente
 
 -   Problemas o posibles desafíos: En @flores, se comenta que la existencia de una tendencia en los reclamos puede causar problemas al momento de buscar las distribuciones que se ajusten a los datos.
 
--   Resumen en un párrafo: El número de reclamos mensuales parece hacer incrementado rápidamente poco tiempo de abrirse el TSA. Esto se podría explicar por la poca experiencia en materia de chequeos y procedimientoslo que posiblemente causó problemas mala práctica con los pasajeros. Sin embargo, luego de alcanzarse un máximo, este comportamiento cambia a un decrecimiento desde entonces. Esto se debe a que probablemente el TSA se ha vuelto mejor con el manejo de los chequeos. Esta tendencia puede ser un problema porque en la literatura se expresó que puede complicar el proceso de ajustar una distribución a los reclamos, notando que al eliminar esta tendencia se facilitaba esta búsqueda.
+-   Resumen en un párrafo: El número de reclamos mensuales parece incrementar rápidamente en los primeros 40 meses del período estudiado. Esto se podría explicar por la poca experiencia en materia de chequeos y procedimientos por parte de los pasajeros y las autoridades. Luego del mes 40 se observa una tendencia a la baja en la cantidad de reclamos, posiblemente porque a este punto ya se habían interiorizado las nuevas prácticas de seguridad. Esta tendencia puede ser un problema porque en la literatura se expresó que puede complicar el proceso de ajustar una distribución a los reclamos, notando que al eliminar esta tendencia se facilitaba esta búsqueda.
+
 
 
 2).
