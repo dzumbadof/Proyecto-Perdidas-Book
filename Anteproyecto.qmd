@@ -36,6 +36,47 @@ library(cowplot) # mejorar el aspecto de los gráficos
 
 - Construir la distribución de pérdidas totales ligadas a los daños a la propiedad y a las personas en aeropuertos estadounidenses a partir de las distribuciones de frecuencia y severidad y con base en datos de TSA para el período 2010-2013.
 
+# Marco teórico 
+
+
+Según  @RAE, un modelo es un esquema teórico, generalmente en forma matemática, de un sistema o de una realidad compleja, que se elabora para facilitar la compresión y el estudio de un comportamiento. En el caso particular en que se busque modelar las pérdidas asociadas a un conjunto de eventos o sucesos, se le denomina modelo de pérdidas.
+
+ @soadefinitions establece que las pérdidas dependen de dos variables aleatorias. La primera es el número de pérdidas que se producirán en un periodo determinado. Esta variable aleatoria del número de pérdidas se denomina comúnmente frecuencia de pérdidas y su distribución de probabilidad se llama distribución de frecuencia.
+ 
+La segunda variable aleatoria es el monto de la pérdida, dado que una pérdida ha ocurrido. Este monto suele denominarse severidad, y la distribución de probabilidad para el monto de la pérdida se denomina distribución de severidad.
+
+En este trabajo, se busca modelar las pérdidas ligadas a los daños a la propiedad y a las personas en aeropuertos de Estados Unidos para el período 2010-2013 , a partir de la frecuencia y severidad de estos.
+ Con la finalidad de contextualizar nuestro estudio, es importante aclarar que el TSA (*Transportation Security Administration*) es la agencia establecida luego del 2001 que se ocupa del chequeo de los pasajeros y su equipaje en los aeropuertos de Estados Unidos.
+
+Como consecuencia de sus labores, es común que se causen daños y extravíos de las pertenencias de los pasajeros lo que resulta en reclamos por parte de los mismos en la forma de compensación monetaria por los daños ocasionados. 
+
+## Teoría de estimación paramétrica de modelos de frecuencia y severidad vía máxima verosimilitud.
+
+Existen una serie de distribuciones de probabilidad estándar que se podrían utilizar para aproximar las distribuciones de las variables aleatorias de la frecuencia de reclamaciones y la severidad o monto de estos reclamos. Las distribuciones binomial, geométrica, binomial negativa y Poisson se consideran para la modelización de la frecuencia.
+
+Por otro lado, entre las distribuciones estándar para modelar la severidad se tienen las siguientes distribuciones: exponencial, gamma, Weibull, Pareto y lognormal.
+
+Tal como lo establece  @cyprian una forma de abordar la escogencia de la distribución correcta es ajustando los datos a las distribuciones estadísticas seleccionadas y los parámetros se estiman mediante el método de máxima verosimilitud.
+
+## Teoría de pruebas de bondad de ajuste.
+
+Las pruebas de bondad de ajuste son utilizadas de forma recurrente una vez ajustas las distribuciones a los datos y estimados los parámetros respectivos con la finalidad de elegir entre las distribuciones que compiten entre sí.
+
+Una prueba de bondad de ajuste es “un procedimiento estadístico que describe qué tan bien se ajusta una distribución a un conjunto de observaciones mediante la medición de la compatibilidad cuantificable entre las distribuciones teóricas estimadas y la distribución empírica de los datos muestrales” [@cyprian]. Estas pruebas adoptan la estructura de prueba de hipótesis donde la hipótesis nula consiste en que los datos siguen una distribución particular. Se presenta a continuación una idea general de tres pruebas de bondad de ajuste de uso frecuente:
+
+- Prueba Chi-Cuadrado: Esta prueba propone un estadístico compuesto de frecuencias observadas y esperadas, calculado a partir de una partición de la muestra, el cual presenta bajo la hipótesis nula una distribución Chi-Cuadrado con grados de libertad que dependen de la cantidad de datos, la cantidad de intervalos de la partición y la cantidad de parámetros de la distribución propuesta calculados por medio de los datos muestrales.
+
+- Prueba Kolmogorov-Smirnov: Se basa en comparar la función de distribución propuesta con la función de distribución empírica de los datos para medir el ajuste, partiendo de que la función de distribución caracteriza a una distribución de probabilidad. Esta comparación se realiza mediante un estadístico que mide la distancia entre ambas distribuciones, del cual se conocen ciertos resultados de convergencia y distribución que fundamentan la efectividad del método.
+
+- Prueba Anderson-Darling:
+Se asemeja a la de Kolmogorov-Smirnov pero mide de una forma distinta la diferencia entre las funciones de distribución empírica y teórica. Además, de acuerdo a @klugman2019loss el estadístico de prueba de Anderson-Darling suele priorizar un mejor ajuste en las colas de la distribución en comparación con las regiones más centrales.
+
+
+
+
+
+
+
 # Análisis descriptivo 
 
 
