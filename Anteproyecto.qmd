@@ -60,7 +60,7 @@ Tal como lo establece  @cyprian una forma de abordar la escogencia de la distrib
 
 ## Teoría de pruebas de bondad de ajuste.
 
-Las pruebas de bondad de ajuste son utilizadas de forma recurrente una vez ajustas las distribuciones a los datos y estimados los parámetros respectivos con la finalidad de elegir entre las distribuciones que compiten entre sí.
+Las pruebas de bondad de ajuste son utilizadas de forma recurrente una vez ajustadas las distribuciones a los datos y estimados los parámetros respectivos con la finalidad de elegir entre las distribuciones que compiten entre sí.
 
 Una prueba de bondad de ajuste es “un procedimiento estadístico que describe qué tan bien se ajusta una distribución a un conjunto de observaciones mediante la medición de la compatibilidad cuantificable entre las distribuciones teóricas estimadas y la distribución empírica de los datos muestrales” [@cyprian]. Estas pruebas adoptan la estructura de prueba de hipótesis donde la hipótesis nula consiste en que los datos siguen una distribución particular. Se presenta a continuación una idea general de tres pruebas de bondad de ajuste de uso frecuente:
 
