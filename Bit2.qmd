@@ -134,7 +134,7 @@ t(tabla) %>%  kbl(digits = 2) %>%
 
 ```
 
-El segundo paso se refiere propiamente a la construcción de los datos de frecuencia y severidad. Esto se realiza agregando los datos ya filtrados de forma mensual. Para el caso de la frecuencia, esto se traduce en el conteo de reclamos en cada mes. Como el periodo de estudio comprende cuatro años (de 2010 a 2013), entonces se extraen 48 conteos ($4\times 12$). Ahora bien, para el caso de la severidad, esto se hace de forma similar solo que sumando los montos finales (*close_amount*) de los reclamos en cada mes, obteniéndose 48 valores para la severidad; por ejemplo, el primer valor de la severidad corresponde al monto total pagado por concepto de reclamos a TSA durante enero de 2010.
+El segundo paso se refiere propiamente a la construcción de los datos de frecuencia y severidad. Esto se realiza agregando los datos ya filtrados de forma mensual. Para el caso de la frecuencia, esto se traduce en el conteo de reclamos en cada mes. Como el período de estudio comprende cuatro años (de 2010 a 2013), entonces se extraen 48 conteos ($4\times 12$). Ahora bien, para el caso de la severidad, esto se hace de forma similar solo que sumando los montos finales (*close_amount*) de los reclamos en cada mes, obteniéndose 48 valores para la severidad; por ejemplo, el primer valor de la severidad corresponde al monto total pagado por concepto de reclamos a TSA durante enero de 2010.
 
 
 ```{r, message=FALSE, warning=FALSE}
@@ -149,8 +149,6 @@ datos_agregados <- datos %>% filter(disposition == "Settle" | disposition== "App
 
 datos_agregados <- datos_agregados %>% group_by("ano" = year(date_received), "mes" = month(date_received) ) %>%  summarise(X = sum(close_amount), N = n()) %>% 
   ungroup() %>% mutate(t = c(1:48), .before = X)
-
-
 ```
 
 En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derecha y que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
@@ -213,7 +211,7 @@ tabla %>%  kbl(digits = 2) %>%
 
 ```
 
-En la tabla @tbl-severidadpromedio se observa la severidad promedio por mes codificado como 1 para enero y 12 para diciembre. Se nota que la severidad la relaciona cercanamente con las temporadas altas: severidades más altas en verano del hemisferio norte y Enero. Aparte de eso, la severidad es aproximadamente uniforme en el resto de los meses. 
+En la tabla @tbl-severidadpromedio se observa la severidad promedio por mes codificado como 1 para enero y 12 para diciembre. Se nota que la severidad la relaciona cercanamente con las temporadas altas: severidades más altas en verano del hemisferio norte y Enero. Aparte de eso, la severidad es aproximadamente uniforme en el resto de los meses. 6
 
 
 ```{r echo=FALSE}

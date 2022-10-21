@@ -9,8 +9,9 @@ book:
   #date: "10/4/2022"
   chapters:
     - index.qmd
-    - Bit1.qmd
-    - Bit2.qmd
+    - Anteproyecto.qmd
+    #- Bit1.qmd
+    #- Bit2.qmd
     #- Bit3.qmd
     #- Bit4.qmd
     - references.qmd
@@ -31,7 +32,15 @@ format:
     toc: true
     lof: true
     lot: true
+    fig-pos: 'H'
 
 editor: source
+
+geometry:
+  - left=.75in
+  - right=.75in
+  - textwidth=4.5in
+  - marginparsep=.25in
+  - marginparwidth=2.25in
 
 from: markdown+tex_math_single_backslash

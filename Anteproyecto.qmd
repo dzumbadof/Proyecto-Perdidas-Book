@@ -1,13 +1,160 @@
 
-# Objetivo general
+```{r echo=FALSE}
+#| output: false
+#| warning: false
+library(readxl)
+library(kableExtra)
+library(readr)
+library(dplyr)
+library(janitor) # función clean_names()
+library(magrittr) # función %<>%
+library(stringr) # función str_replace
+library(lubridate)
+library(PerformanceAnalytics) # funciones skewness y kurtosis
+library(ggplot2)
+library(actuar)
+library(fitdistrplus)
+library(stats)
+library(cowplot) # mejorar el aspecto de los gráficos
+```
+# Objetivos
+
+## Objetivo general
 
 - Modelar la distribución de las pérdidas ligadas a daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de la Administración de Seguridad en el Transporte (TSA) para el período 2010-2013.
 
-# Objetivos específicos
+## Objetivos específicos
 
 - Elegir la distribución de frecuencia de reclamos de daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de TSA para el período 2010-2013.
 
 - Escoger la distribución de la severidad de reclamos de daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de TSA para el período 2010-2013.
 
 - Construir la distribución de pérdidas totales ligadas a los daños a la propiedad y a las personas en aeropuertos estadounidenses a partir de las distribuciones de frecuencia y severidad y con base en datos de TSA para el período 2010-2013.
+
+
+# Análisis descriptivo 
+
+
+```{r}
+#| output: false
+#| warning: false
+#| echo: false
+
+# Se cargan y depuran los datos
+
+datos <- read_excel("claims-2010-2013.xlsx") %>%
+  clean_names() # se limpian nombres columnas
+
+datos <- datos %>% mutate(date_received = ymd(date_received),
+                      close_amount = as.numeric(gsub("\\$", "", close_amount)))
+
+# Se fija la base de datos
+
+attach(datos)
+```
+
+
+```{r}
+#| tbl-cap: "Reclamos recibidos por la TSA en el periodo 2010-2013"
+#| label: tbl-headDatos
+#| echo: false
+
+
+  head(datos) %>%
+  kbl(align = rep('r', ncol(head(datos))),
+      format.args = list(big.mark = ' '),booktabs=T) %>% 
+  kable_styling(latex_options = c("striped", "condensed", "scale_down"))  %>%
+  kable_styling(full_width = F) %>% kable_classic_2() %>%
+  row_spec(0,bold=TRUE) %>% 
+  column_spec(1:11, width = "3cm") %>% 
+  scroll_box()
+```
+
+En este punto se observa que la variable de mayor interés es *close_amount*, pues corresponde al desembolso efectivo al atender reclamos. Sin embargo, esta variable no es en sí misma útil para implementar los modelos sugeridos, sino que se tienen que construir los datos de frecuencia y severidad de los reclamos a TSA. Siguiendo a @flores y @chen2020aggregate se realizan dos cambios relevantes a este respecto. El primero consiste en filtrar la base de datos para conservar solamente aquellas observaciones en que efectivamente hubo un desembolso al atender el reclamo. Para esto se utiliza la variable *disposition*, que corresponde al estado de resolución del reclamo e indica si el reclamo fue denegado, si se pagó por completo el monto solicitado (aprobado) o si se llegó a un acuerdo (acordado) y se pagó solamente una fracción del monto del reclamo. Consecuentemente, al filtrar las observaciones se pasa de 41 598 observaciones a 12 743
+
+```{r, message=FALSE, warning=FALSE}
+#| echo: false
+
+# X: Severidad
+# N: Frecuencia
+
+# Se filtran los reclamos aprobados o en los que se llegó a un acuerdo
+
+datos_agregados <- datos %>% filter(disposition == "Settle" | disposition== "Approve in Full")
+
+datos_agregados <- datos_agregados %>% group_by("ano" = year(date_received), "mes" = month(date_received) ) %>%  summarise(X = sum(close_amount), N = n()) %>% 
+  ungroup() %>% mutate(t = c(1:48), .before = X)
+```
+
+En la @tbl-medidas_severidad_frecuencia se muestran algunas estadísticas de los datos de frecuencia y severidad. Sorprende principalmente la asimetría obtenida para la severidad, que marca una discrepancia con los resultados obtenidos tanto por @flores como por @chen2020aggregate, dado que ambos autores presentan coeficientes de asimetría positivos, sin embargo, debe tenerse en cuenta que el primero utiliza datos del período 2003-2015 (desagregados además por sitio y tipo) y el segundo del período 2008-2012. De la @fig-histograma_severidad ya se observaba que no hay una asimetría positiva marcada en la severidad.
+
+
+```{r, echo=FALSE}
+#| tbl-cap: "Medidas estadísticas de resumen para la severidad y la frecuencia"
+#| label: tbl-medidas_severidad_frecuencia
+
+medidas <- function(x){
+  r <- summary(x) %>% as.vector()
+  temp <- data.frame(c(r, sd(x), IQR(x),skewness(x), kurtosis(x)))
+  return(temp)
+}
+
+
+nombres <- c("Mínimo",
+             "Primer cuartil",
+             "Mediana",
+             "Media",
+             "Tercer cuartil",
+             "Máximo",
+             "Desviación estándar",
+             "Rango intercuartil",
+             "Asimetría",
+             "Curtosis")
+
+tabla <- cbind(medidas(datos_agregados$N), medidas(datos_agregados$X))
+
+rownames(tabla) <- nombres
+colnames(tabla) <- c("Frecuencia", "Severidad")
+
+tabla %>%  kbl(digits = 2) %>%
+  kable_styling() %>%
+  kable_classic_2(full_width = F) %>% 
+   row_spec(0, bold = T) %>% 
+  column_spec(c(1,2,3), width = "2cm") %>%
+    column_spec(1, bold = T) %>% t()
+
+```
+
+```{r}
+#| fig-cap: "Número de reclamos mensuales del 2010 al 2013"
+#| label: fig-reclamosmensuales
+#| echo: false
+
+
+ggplot(datos_agregados, aes( x=t, y = N)) + geom_point(color='red', size=2) + 
+  xlab("Tiempo") + ylab("Reclamos")+
+  theme_minimal()
+```
+
+La @fig-reclamosmensuales muestra el conteo de incidencias menusales entre 2010 y finales del 2013. Se Muestra una tendencia fuerte de incrementeo hasta el mes 40. Esto se puede explicar a partir de que el TSA fue creado en el 2002 y durante su período inicial de funcionamiento se implementaron nuevas prácticas de seguridad en el aeropuerto por lo que los pasajeros y las autoridades tuvieron un período de aprendizaje. Luego del mes 40 se observa una fuerte tendencia de decremento posiblemente porque la población a este punto ya se acostumbró a las nuevas medidas implementadas. Esta tendencia es importante notarla pues @flores comenta que puede dificultar el proceso de ajustarle una distribución. 
+```{r, echo=FALSE}
+#| fig-cap: "Histograma de montos pagados agregados por mes"
+#| label: fig-histograma_severidad
+
+g <- ggplot(datos_agregados, aes(x=X)) 
+g <- g + geom_histogram(colour="black", fill="#40A195", bins=7)
+g <- g + scale_y_continuous(breaks = seq(0,22,2))
+g <- g + scale_x_continuous(breaks = seq(5000,125000, 15000))
+g <- g + labs(x = "Monto pagado",
+              y = "Frecuencia",
+              caption = "Fuente: Elaboración propia con datos de TSA")
+
+g <- g + theme_cowplot()
+
+g
+
+```
+
+En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derecha y que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
+
 
