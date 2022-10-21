@@ -1,0 +1,13 @@
+
+# Objetivo general
+
+- Modelar la distribución de las pérdidas ligadas a daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de la Administración de Seguridad en el Transporte (TSA) para el período 2010-2013.
+
+# Objetivos específicos
+
+- Elegir la distribución de frecuencia de reclamos de daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de TSA para el período 2010-2013.
+
+- Escoger la distribución de la severidad de reclamos de daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de TSA para el período 2010-2013.
+
+- Construir la distribución de pérdidas totales ligadas a los daños a la propiedad y a las personas en aeropuertos estadounidenses a partir de las distribuciones de frecuencia y severidad y con base en datos de TSA para el período 2010-2013.
+
