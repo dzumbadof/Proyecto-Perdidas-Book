@@ -17,6 +17,11 @@ library(fitdistrplus)
 library(stats)
 library(cowplot) # mejorar el aspecto de los gráficos
 ```
+
+# Pregunta de investigación
+
+¿Cómo se puede modelar las pérdidas ligadas a los daños a la propiedad y a las personas en aeropuertos a partir de su frecuencia y severidad?
+
 # Objetivos
 
 ## Objetivo general
@@ -30,7 +35,6 @@ library(cowplot) # mejorar el aspecto de los gráficos
 - Escoger la distribución de la severidad de reclamos de daños a la propiedad y a las personas en aeropuertos estadounidenses con base en datos de TSA para el período 2010-2013.
 
 - Construir la distribución de pérdidas totales ligadas a los daños a la propiedad y a las personas en aeropuertos estadounidenses a partir de las distribuciones de frecuencia y severidad y con base en datos de TSA para el período 2010-2013.
-
 
 # Análisis descriptivo 
 
@@ -156,5 +160,16 @@ g
 ```
 
 En la @fig-histograma_severidad se observa la distribución empírica de la severidad. Se observa que la cola izquierda aparenta acumular un mayor peso que la derecha y que la mayor concentración ocurre aproximadamente para los montos pagados entre 50 000 y 60 000 dólares.
+
+
+# Propuesta de métodos para responder la pregunta de investigación
+
+Para responder al primer objetivo de la investigación, se proponen distintos acercamientos paramétricos para modelar la frecuencia, que se pueden resumir en los integrantes de la clase distribuciones discretas $(a,b,0)$, a saber: la distribución binomial, la binomial negativa, la geométrica (que es un caso particular de la biniomial negativa) y la Poisson. Además, se considerarán a su vez los integrantes de la familia $(a,b,1)$, que corresponden a variaciones de las anteriores con modificaciones o truncamientos en los valores de la probabilidad de ocurrencia de cero reclamos. 
+
+En cuanto a la estimación de los parámetros de los modelos de frecuencia, estos sea realizarán vía máxima verosimilitud. Posteriormente, para decidir cuál distribución es más adecuada para modelizar la frecuencia de los reclamos, se conducirá sobre cada una una prueba chi cuadrado de bondad de ajuste. Una vez obtenidas las distribuciones para las que no se haya obtenido un rechazo en la prueba anterior, se utilizará la magnitud de las medidas de AIC y BIC para comparar entre las distintas opciones y decidir la más adecuada. 
+
+Para responder al segundo objetivo, se proponen acercamientos paramétricos mediante las distribuciones: Exponencial, Gamma, Pareto, Lognormal y Weibull. De forma similar al caso de la frecuencia, con la severidad se conducirán pruebas de bondad de ajuste mediante las técnicas de Kolmogorov-Smirnov y Anderson-Darling. De las distribuciones para las que no se rechazara antes la bondad de ajuste, se determinará la más popicia con las medidas de AIC y BIC.
+
+Finalmente, bajo un modelo de pérdidas agregadas, se buscará determinar la distribución de las pérdidas totales en dos pasos: 1) Se procede a discretizar la distribución de la severidad mediante el método de redondeo; y 2) Se calcula la distribución de las pédidas totales mediante la fórmula de Panjer con la distribución de frecuencia seleccionada y la de severidad discretizada. 
 
 
