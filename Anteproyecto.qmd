@@ -16,6 +16,7 @@ library(actuar)
 library(fitdistrplus)
 library(stats)
 library(cowplot) # mejorar el aspecto de los gráficos
+library(xtable) # tablas a latex
 ```
 
 # Pregunta de investigación
@@ -105,7 +106,7 @@ attach(datos)
 #| echo: false
 
 
-  head(datos) %>%
+head(datos) %>%
   kbl(align = rep('r', ncol(head(datos))),
       format.args = list(big.mark = ' '),booktabs=T) %>% 
   kable_styling(latex_options = c("striped", "condensed", "scale_down"))  %>%
@@ -113,6 +114,17 @@ attach(datos)
   row_spec(0,bold=TRUE) %>% 
   column_spec(1:11, width = "3cm") %>% 
   scroll_box()
+
+# print(xtable(head(datos), digits = 0,
+#              caption = "Reclamos recibidos por la TSA en el periodo 2010-2013", 
+#              align = "|l|l|l|l|l|l|l|l|l|l|l|l|" , 
+#              label = "headDatos"),
+#       include.rownames = F, 
+#       include.colnames = T, 
+#        caption.placement = "top", 
+#       row.names=F)
+
+
 ```
 
 En este punto se observa que la variable de mayor interés es *close_amount*, pues corresponde al desembolso efectivo al atender reclamos. Sin embargo, esta variable no es en sí misma útil para implementar los modelos sugeridos, sino que se tienen que construir los datos de frecuencia y severidad de los reclamos a TSA. Siguiendo a @flores y @chen2020aggregate se realizan dos cambios relevantes a este respecto. El primero consiste en filtrar la base de datos para conservar solamente aquellas observaciones en que efectivamente hubo un desembolso al atender el reclamo. Para esto se utiliza la variable *disposition*, que corresponde al estado de resolución del reclamo e indica si el reclamo fue denegado, si se pagó por completo el monto solicitado (aprobado) o si se llegó a un acuerdo (acordado) y se pagó solamente una fracción del monto del reclamo. Consecuentemente, al filtrar las observaciones se pasa de 41 598 observaciones a 12 743
@@ -167,6 +179,14 @@ tabla %>%  kbl(digits = 2) %>%
    row_spec(0, bold = T) %>% 
   column_spec(c(1,2,3), width = "2cm") %>%
     column_spec(1, bold = T) %>% t()
+
+print(xtable(t(tabla), digits = 2,
+             caption = "Medidas estadísticas de resumen para la severidad y la frecuencia",
+             label = "medidas_severidad_frecuencia"),
+      include.rownames = T,
+      include.colnames = T,
+       caption.placement = "top",
+      row.names=F)
 
 ```
 
