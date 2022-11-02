@@ -1,33 +1,34 @@
+---
+lang: es
+---
+
+
 # Bitácora 3
 
-Aquí se hace la bitácora 3
 
-+--------------------+----------------+
-| Sección            | Temas a tratar |
-+:==================:+:==============:+
-|                    | 1.             |
-|                    |                |
-| Introducción       | 2.  b          |
-|                    |                |
-|                    | 3.  c          |
-|                    |                |
-|                    | 4.  d          |
-|                    |                |
-|                    | 5.  f          |
-+--------------------+----------------+
-| Metodología        | 1.  1          |
-|                    |                |
-|                    | 2.  2          |
-|                    |                |
-|                    | 3.  3          |
-|                    |                |
-|                    | 4.  4          |
-+--------------------+----------------+
-| Resultados         | 1.  x          |
-|                    |                |
-|                    | 2.  y          |
-|                    |                |
-|                    | 3.  z          |
-+--------------------+----------------+
++------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Sección          | Temas a tratar                                                                                                                                           |
++:================:+:========================================================================================================================================================:+
+| Introducción     | 1.  Introducción al modelado de pérdidas.                                                                                                                |
+|                  | 2.  Contextualización de la problemática surgida por los daños a la propiedad y a las personas en aeropuertos de Estados Unidos.                         |
+|                  | 3.  Teoría de estimación paramétrica,pruebas de bondad de ajuste y pérdidas agregadas.                                                                   |
+|                  | 4.  Resultados de estudios afines.                                                                                                                       |
++------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Metodología      | 1.  Introducción de la base de datos y análisis descriptivo                                                                                              |
+|                  |                                                                                                                                                          |
+|                  | 2.  Método A: Estimación paramétrica vía máxima verosimilitud.                                                                                           |
+|                  |                                                                                                                                                          |
+|                  | 3.   Método B: Selección de modelos vía : AIC, BIC y pruebas Chi-Cuadrado, Kolmogorov-Smirnov y Anderson-Darling para modelos obtenidos por método A.    |
+|                  |                                                                                                                                                          |
+|                  | 4.  Método C: Método de recursión (Fórmula de Panjer) para los modelos seleccionados según método B.                                                     |
++------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Resultados       | 1.  Resultado A:                                                                                                                                         |
+|                  |                                                                                                                                                          |
+|                  | 2.  Resultado B:                                                                                                                                         |
+|                  |                                                                                                                                                          |
+|                  | 3.  Limitaciones de la metodología y los datos (pendiente)                                                                                               |
+|                  |                                                                                                                                                          |
+|                  | 4.  Recomendaciones (pendiente)                                                                                                                          |
++------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-: Tabla de Distribución de contenidos por sección.
+Table: Distribución de contenidos por sección.
