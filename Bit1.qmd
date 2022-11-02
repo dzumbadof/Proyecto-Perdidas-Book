@@ -101,9 +101,11 @@ Los datos se conforman por 13 variables: claim_number es el identificador del re
 
 1.  Modelo: Según @RAE, un modelo es un esquema teórico, generalmente en forma matemática, de un sistema o de una realidad compleja, (...) que se elabora pra facilitar la compresión y el estudio de un comportamiento.
 
-2.  Frecuencia: Según @RAE, es el número de veces que se repite un proceso periódico por u nidad de tiempo
+2.  Frecuencia: Según @soadefinitions es el número de pérdidas que se producirán en un periodo determinado. Esta variable aleatoria del número de pérdidas se denomina comúnmente frecuencia de pérdidas y su distribución de probabilidad se llama distribución de frecuencia.
+ 
 
-3.  Severidad: Según @ortegametodologia, la severidad es la pérdida económica que enfrentará la empresa o institución financiera producto de sus actividades.
+
+3.  Severidad: Según @soadefinitions esta es la variable aleatoria del monto de la pérdida, dado que una pérdida ha ocurrido. Este monto suele denominarse severidad, y la distribución de probabilidad para el monto de la pérdida se denomina distribución de severidad.
 
 ![Borrador de la UVE Heurística](Images/UVE%20Maik.png){fig-align="center" width="600"}
 
