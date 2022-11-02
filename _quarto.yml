@@ -9,10 +9,9 @@ book:
   #date: "10/4/2022"
   chapters:
     - index.qmd
-    - Anteproyecto.qmd
-    #- Bit1.qmd
-    #- Bit2.qmd
-    #- Bit3.qmd
+    - Bit1.qmd
+    - Bit2.qmd
+    - Bit3.qmd
     #- Bit4.qmd
     - references.qmd
 

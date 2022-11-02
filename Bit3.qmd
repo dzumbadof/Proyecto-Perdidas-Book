@@ -1,11 +1,177 @@
----
-lang: es
----
-
-
 # Bitácora 3
 
+## Parte de Planificación
 
+### 1. Ajuste del modelo
+
+```{r echo=FALSE}
+#| output: false
+#| warning: false
+
+library(readxl)
+library(kableExtra)
+library(readr)
+library(dplyr)
+library(janitor) # función clean_names()
+library(magrittr) # función %<>%
+library(stringr) # función str_replace
+library(lubridate)
+library(PerformanceAnalytics) # funciones skewness y kurtosis
+library(ggplot2)
+library(actuar)
+library(fitdistrplus)
+library(stats)
+library(cowplot) # mejorar el aspecto de los gráficos
+library(gamlss) #distribucion Johnson SU
+library(glogis) #distribucion logistica generalizada
+```
+
+```{r}
+#| echo: false
+#| warning: false
+
+datos <- read_excel("claims-2010-2013.xlsx") %>%
+
+clean_names() # se limpian nombres columnas
+
+datos <- datos %>% mutate(date_received = ymd(date_received),
+
+close_amount = as.numeric(gsub("\\$", "", close_amount)))
+
+# Se fija la base de datos
+
+attach(datos)
+```
+
+```{r, message=FALSE, warning=FALSE}
+#| echo: false
+
+# X: Severidad
+
+# N: Frecuencia
+
+# Se filtran los reclamos aprobados o en los que se llegó a un acuerdo
+
+datos_agregados <- datos %>% 
+  filter(disposition == "Settle" | disposition== "Approve in Full")
+
+datos_agregados <- datos_agregados %>% 
+  group_by("ano" = year(date_received), "mes" = month(date_received) ) %>% 
+  summarise(X = sum(close_amount), N = n()) %>%
+  ungroup() %>% mutate(t = c(1:48), .before = X)
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+
+X <- datos_agregados$X/1000
+
+fit_lnorm <- fitdist(data = X, distr = "lnorm", method = "mle")
+
+fit_exp <- fitdist(data = X, distr = "exp", method = "mle")
+
+fit_gamma <- fitdist(data = X, distr = "gamma", method = "mle")
+
+fit_JSU <- fitdist(data = X, distr = 'JSU', method = "mle", 
+                   start=list(mu=0.3, sigma=1, nu=1,tau=0.4))
+
+fit_glogis <- fitdist(data = X, distr = 'glogis', method = "mle",
+                      start=list(location=0.2, scale=1, shape=1))
+
+fit_weibull <- fitdist(data = X, distr = 'weibull', method = "mle")
+```
+
+```{r}
+#| echo: false  
+
+goftest <- gofstat(list(fit_lnorm, fit_exp, fit_gamma, 
+                        fit_JSU, fit_glogis, fit_weibull))
+
+```
+
+```{r}
+#| echo: false
+#| fig-cap: "Densidad de las distribuciones ajustadas con MLE"
+#| label: fig-denscompSeveridad
+
+plot.legend <- c('lnorm', 'exp', 'gamma', 'JSU', 'gLogis', 'Weibull')
+denscomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
+         legendtext = plot.legend)
+```
+
+```{r}
+#| echo: false
+#| fig-cap: "Función cumulativa de las distribuciones ajustadas con MLE"
+#| label: fig-cdfcompSeveridad
+cdfcomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
+        legendtext = plot.legend)
+```
+
+```{r}
+#| echo: false
+#| tbl-cap: "Métricas de bondad de ajuste de la severidad"
+#| label: tbl-metricasSeveridad
+#| tbl-pos: 'h'
+
+LogLik <- c(fit_lnorm$loglik, fit_exp$loglik, fit_gamma$loglik, 
+            fit_JSU$loglik, fit_glogis$loglik, fit_weibull$loglik)
+
+goft <- data.frame( dist = c('log-normal', 'exponencial', 'gamma', 
+                             'Johnson SU', 'glogis', 'Weibull'), 
+                    AIC = as.numeric(goftest$aic), 
+                    BIC = as.numeric(goftest$bic), 
+                    Loglik = LogLik, ad=as.numeric(goftest$ad), 
+                    ks = as.numeric(goftest$ks))
+
+goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik', 
+                'Estad. AD', 'Estad. KS'), digits = 2) %>%#| fig-cap: "Densidad de las distribuciones ajustadas con MLE"
+#| label: fig-mayormontoaerolineas
+                 kable_styling(latex_options = c("striped"))%>%
+  kable_styling(full_width = F)%>%
+  kable_classic_2() %>%
+  row_spec(0,bold=TRUE)
+```
+
+### 2. Fichas de resultados
+* 1. 
+    + Nombre de Resultado: Ajuste visual de la distribuciones de la severidad 
+    +Resumen en una oración: La @fig-denscompSeveridad y 
+   @fig-cdfcompSeveridad muestran que la logística generalizada, Weibull y 
+   Johnson SU se acerca mejor a los datos de la severidad
+   +Principal característica: 
+   +Problemas o posibles desafíos: 
+   +Resumen en un párrafo: 
+   
+2. 
+    +Nombre de Resultado: kolmogorov-Smirnov da mejor para logistica generalizada
+    +Resumen en una oración: 
+    +Principal característica:
+    +Problemas o posibles desafíos: 
+    +Resumen en un párrafo: 
+    
+3. 
+    +Nombre de Resultado: Anderson-Darling da mejor para logistica generalizada
+    +Resumen en una oración: 
+    +Principal característica:
+    +Problemas o posibles desafíos: 
+    +Resumen en un párrafo: 
+   
+4. Nombre de Resultado: Ajuste visual de la distribuciones de la severidad
+   Resumen en una oración: 
+   Principal característica:
+   Problemas o posibles desafíos: 
+   Resumen en un párrafo:
+   
+5. Nombre de Resultado: Ajuste visual de la distribuciones de la severidad
+   Resumen en una oración: 
+   Principal característica:
+   Problemas o posibles desafíos: 
+   Resumen en un párrafo: 
+   
+   |
+### 3. Tablas
 +------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Sección          | Temas a tratar                                                                                                                                           |
 +:================:+:========================================================================================================================================================:+
@@ -32,3 +198,6 @@ lang: es
 +------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Table: Distribución de contenidos por sección.
+
+
+## Parte de escritura
