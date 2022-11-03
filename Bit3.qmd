@@ -4,7 +4,7 @@
 
 ### 1. Ajuste del modelo
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=TRUE}
 #| output: false
 #| warning: false
 
@@ -26,7 +26,7 @@ library(gamlss) #distribucion Johnson SU
 library(glogis) #distribucion logistica generalizada
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 #| echo: false
 #| warning: false
 
@@ -61,6 +61,254 @@ datos_agregados <- datos_agregados %>%
   ungroup() %>% mutate(t = c(1:48), .before = X)
 
 ```
+
+
+#### Ajuste de la frecuencia
+
+
+```{r Distribución empírica frecuencia, echo=FALSE}
+F_N <- ecdf(datos_agregados$N)
+```
+
+
+@fig-ajustePoisson
+
+```{r Ajuste Poisson, echo=FALSE, warning=FALSE}
+#| fig-cap: "Ajustes distribución Poisson"
+#| label: fig-ajustePoisson
+#| echo: false
+fit_Poisson <- fitdist(data = datos_agregados$N,distr = "pois", method = "mle")
+
+fit_ZTPoisson <- fitdist(data = datos_agregados$N,distr = "ztpois", method = "mle", start = list(lambda=10))
+
+fit_ZMPoisson <- fitdist(data = datos_agregados$N,distr = "zmpois", method = "mle", start = list(lambda=10, p0=0.1), lower=c(0,0), upper=c(Inf, 1))
+
+cdfcomp(list(fit_Poisson, fit_ZTPoisson, fit_ZMPoisson),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Truncada","Modificada"))
+
+# gofstat(list(fit_Poisson, fit_ZTPoisson, fit_ZMPoisson))
+```
+
+@fig-ajustebinneg
+
+```{r Ajuste Binomial negativa, echo=FALSE, warning=FALSE}
+#| fig-cap: "Ajustes distribución binomial negativa"
+#| label: fig-ajustebinneg
+#| echo: false
+#| 
+fit_Nbinom <- fitdist(data = datos_agregados$N, distr = "nbinom", method = "mle")
+
+fit_ZTNbinom <- fitdist(data = datos_agregados$N, distr = "ztnbinom", method = "mle", start = list(size=1, prob=0.3),  lower=c(0,0), upper=c(Inf, 1))
+
+fit_ZMNbinom <- fitdist(data = datos_agregados$N, distr = "zmnbinom", method = "mle", start = list(size=1, prob=0.3, p0=0.3),  lower=c(0, 0, 0), upper=c(Inf, 1, 1))
+
+cdfcomp(list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial\n negativa","Truncada","Modificada"))
+# gofstat(list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom))
+```
+@fig-ajustegeom
+
+```{r Ajuste Geométrica, echo=FALSE, warning=FALSE}
+#| fig-cap: "Ajustes distribución geométrica"
+#| label: fig-ajustegeom
+#| echo: false
+#| 
+fit_Geom <- fitdist(data = datos_agregados$N, distr = "geom", method = "mle")
+
+fit_ZTGeom <- fitdist(data = datos_agregados$N, distr = "ztgeom", method = "mle",  start = list(prob = 0.8))
+
+fit_ZMGeom <- fitdist(data = datos_agregados$N, distr = "zmgeom", method = "mle",  start = list(prob = 0.8, p0=0.3), lower=c( 0, 0), upper=c(1, 1))
+
+
+cdfcomp(list(fit_Geom, fit_ZTGeom, fit_ZMGeom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Geométrica","Truncada","Modificada"))
+# gofstat(list(fit_Geom, fit_ZTGeom, fit_ZMGeom))
+```
+
+@fig-ajustebinom
+
+```{r Ajuste Binomial, echo=FALSE, warning=FALSE, message=FALSE}
+#| fig-cap: "Ajustes distribución binomial"
+#| label: fig-ajustebinom
+#| echo: false
+#| 
+m <- max(datos_agregados$N)
+fit_Binom <- fitdist(data = datos_agregados$N, dist = "binom", method = "mle", start = list(prob = 0.5, size = m+200), lower=c(0,m-1), upper=c(1, Inf))
+
+fit_ZTBinom <- fitdist(data = datos_agregados$N, dist = "ztbinom", method = "mle", start = list(prob = 0.5, size = m+200), lower=c(0,m-1), upper=c(1, Inf))
+
+fit_ZMBinom <- fitdist(data = datos_agregados$N, dist = "zmbinom", method = "mle", start = list(prob = 0.5, size = m+200, p0=0.01), lower=c(0, m-1, 0), upper=c(1, Inf, 1))
+
+cdfcomp(list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="Ajustes distribución binomial", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial","Truncada","Modificada"))
+        
+# gofstat(list(fit_Binom, fit_ZTBinom, fit_ZMBinom))
+
+
+# m <- max(datos_agregados$N)
+# binomial_loglik <- data.frame(
+#   size = numeric(0),
+#   prob = numeric(0),
+#   loglik = numeric(0)
+# )
+# for (s in (99000):(100000)) {
+#   fit_Binom <- fitdist(
+#     data = datos_agregados$N,
+#     dist = "binom",
+#     fix.arg = list(size = s),
+#     start = list(prob = 0.01)
+#   )
+#   binomial_loglik <- rbind(
+#     binomial_loglik,
+#     data.frame(
+#       size = s,
+#       prob =   fit_Binom$estimate,
+#       fit = dbinom(
+#         x = s,
+#         size = s,
+#         prob = fit_Binom$estimate["prob"]
+#       ),
+#       loglik = fit_Binom$loglik
+#     )
+#   )
+# }
+# 
+# pos_max <- which.max(binomial_loglik$loglik)
+# 
+# binomial_loglik[pos_max,]
+# 
+
+# # Se hace la optimización de forma manual
+# logvero <- function(x, m){
+#   q = mean(x)/m
+#   l <- -sum(dbinom(x, size = m, prob=q, log = TRUE))
+#   return(l)
+# }
+# 
+# optim(par = 400, fn = logvero, x=datos_agregados$N)
+# s <- sapply(X = m:4000, FUN = logvero, x=datos_agregados$N)
+# plot(s)
+
+```
+
+@fig-ajusteab0
+
+```{r Familia (a,b,0), echo=FALSE}
+#| fig-cap: "Ajustes con distribuciones de la clase (a,b,0)"
+#| label: fig-ajusteab0
+#| echo: false
+#| 
+cdfcomp(list(fit_Poisson, fit_Geom, fit_Nbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
+```
+@fig-ajusteab1trunc
+
+```{r Familia (a,b,1) truncadas , echo=FALSE}
+#| fig-cap: "Ajustes con distribuciones de la clase (a,b,1) truncadas en cero"
+#| label: fig-ajusteab1trunc
+#| echo: false
+
+cdfcomp(list(fit_ZTPoisson, fit_ZTGeom, fit_ZTNbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
+```
+@fig-ajusteab1mod
+
+```{r Familia (a,b,1) modificadas , echo=FALSE}
+#| fig-cap: "Ajustes con distribuciones de la clase (a,b,1) modificadas en cero"
+#| label: fig-ajusteab1mod
+#| echo: false
+
+cdfcomp(list(fit_ZMPoisson, fit_ZMGeom, fit_ZMNbinom, fit_ZMBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
+```
+
+```{r Ajuste Poisson-Gaussiana inversa, echo=FALSE, results=FALSE}
+# fit_InvGauss <- fitdist(data = datos_agregados$N, distr = "poisinvgauss", method = "mle",  start = list(mean = 50, shape = 10))
+# gofstat(fit_InvGauss, discrete = TRUE)
+# cdfcomp(fit_InvGauss)
+```
+
+```{r Ajuste Polya-Aeppli, echo=FALSE, results=FALSE}
+# library(polyaAeppli)
+# fit_PolyaAeppli <- fitdist(data = datos_agregados$N, distr = "PolyaAeppli", method = "mle",  start = list(lambda = 10, prob = 0.3), lower = c(0,0), upper = c(Inf,1))
+# cdfcomp(fit_PolyaAeppli)
+# gofstat(fit_PolyaAeppli, discrete = TRUE)
+```
+
+
+```{r}
+#| echo: false
+#| tbl-cap: "Parámetros de los modelos ajsutados para la frecuencia"
+#| label: tbl-parametrosFrecuencia
+#| tbl-pos: 'h'
+
+arreglo_de_parametros <- function(modelo){
+par <- modelo$estimate
+resultados = ""
+pruebas <- gofstat(modelo, discrete = TRUE)
+valor_p <- pruebas$chisqpvalue
+
+for (i in 1:length(names(par))) {
+
+    nombre <- paste("$\\texttt{",names(par)[i], "}$")
+  if(resultados==""){
+  resultados <- paste(nombre,"=",round(as.numeric(par[i]),6) )
+  }else{
+    resultados <- paste(resultados,",", nombre ,"=",round(as.numeric(par[i]),6) )
+  }
+}
+temp <- c(modelo$distname, resultados)
+# temp <- c(modelo$distname, resultados, round(modelo$aic,6), round(modelo$bic, 6), round(valor_p, 10))
+
+return(temp)
+}
+
+dist_frec <- list(fit_Poisson, fit_ZTPoisson, fit_ZMPoisson, fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom, 
+                  fit_Geom, fit_ZTGeom, fit_ZMGeom, 
+                  fit_Binom, fit_ZTBinom, fit_ZMBinom)
+
+tabla <- cbind(sapply(dist_frec, arreglo_de_parametros)) %>% t() %>% as.data.frame()
+
+
+nombres_dists <- c("Poisson"," ZT-Poisson", "ZM-Poisson",
+                   "Binomial negativa", "ZT-Binomial negativa", "ZM-Binomial negativa", "Geométrica", "ZT-Geométrica", "ZM-Geométrica","Binomial", "ZT-Binomial", "ZM-Binomial")
+
+tabla[,1] <- nombres_dists
+colnames(tabla) <- c("$\\textbf{Distribución}$", "$\\textbf{Parámetros en } \\texttt{R}$")
+
+kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options = c("striped"))%>%
+  kable_styling(full_width = F)%>%
+  kable_classic_2() %>%
+  row_spec(0,bold=TRUE)
+
+```
+
+```{r}
+#| echo: false
+#| tbl-cap: "Métricas de los modelos ajsutados para la frecuencia"
+#| label: tbl-metricasFrecuencia
+#| tbl-pos: 'h'
+arreglo_de_metricas <- function(modelo){
+par <- modelo$estimate
+resultados = ""
+pruebas <- gofstat(modelo, discrete = TRUE)
+valor_p <- pruebas$chisqpvalue
+
+temp <- c(modelo$distname, round(modelo$aic,8), round(modelo$bic, 8), round(valor_p, 10))
+
+return(temp)
+}
+
+tabla <- cbind(sapply(dist_frec, arreglo_de_metricas)) %>% t() %>% as.data.frame()
+
+nombres_dists <- c("Poisson"," ZT-Poisson", "ZM-Poisson",
+                   "Binomial negativa", "ZT-Binomial negativa", "ZM-Binomial negativa", "Geométrica", "ZT-Geométrica", "ZM-Geométrica","Binomial", "ZT-Binomial", "ZM-Binomial")
+
+tabla[,1] <- nombres_dists
+colnames(tabla) <- c("Distribución", "AIC", "BIC", "Valor $p$")
+
+kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options = c("striped"))%>%
+  kable_styling(full_width = F)%>%
+  kable_classic_2() %>%
+  row_spec(0,bold=TRUE)
+```
+
+
+
+#### Ajuste de la severidad
 
 ```{r}
 #| echo: false
@@ -169,6 +417,49 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
    Principal característica:
    Problemas o posibles desafíos: 
    Resumen en un párrafo: 
+   
+6. **Nombre de Resultado**: Ajuste visual de la distribuciones de clase $(a,b,0)$ para la frecuencia
+
+   **Resumen en una oración**: Se grafican las CDF empíricas contra las teóricas y ningún ajuste es bueno.
+   
+   **Principal característica**: La distribución binomial negativa parece el mejor ajuste.
+   
+   **Problemas o posibles desafíos**: Ninguna de las distribuciones básicas de frecuencia logra emular la forma de la distribución empírica, por lo que deben buscarse otras distribuciones discretas que posean una mayor flexibilidad. Además, se presentaron muchas dificultades de índole numérica 
+   
+   **Resumen en un párrafo**: En la @fig-ajusteab0 se presentan los ajustes de las distribuciones de la clase $(a,b,0)$ para modelar la frecuencia de los reclamos. Ninguna parece emular suficientemente bien la forma de la distribución empírica, siendo la binomial negativa la que parece hacerlo mejor. Para esta distribución, se obtuvieron los parámetros $n=8$ y $p =265.49$ según la parametrización de $\texttt{R}$. Los resultado para las demás distribuciones, se resumen en la @tbl-parametrosFrecuencia.  
+
+7. **Nombre de Resultado**: Ajuste visual de la distribuciones de clase $(a,b,1)$ para la frecuencia
+
+   **Resumen en una oración**: Se grafican las CDF empíricas contra las teóricas y ningún ajuste es bueno.
+   
+   **Principal característica**: La distribución binomial negativa parece el mejor ajuste, tanto en el caso truncado como en el modificado.
+   
+   **Problemas o posibles desafíos**: Ninguna de las distribuciones básicas de la familia $(a,b,1)$ logra emular la forma de la distribución empírica, de forma que debe explorarse alguna alternativa que permita una mayor flexibilidad.
+   
+   **Resumen en un párrafo**: En las figuras [-@fig-ajusteab1trunc] y [-@fig-ajusteab1mod] se presentan los ajustes de las distribuciones de la clase $(a,b,1)$ para modelar la frecuencia de los reclamos. Ninguna parece emular suficientemente bien la forma de la distribución empírica, siendo la binomial negativa la que parece hacerlo mejor en ambos casos. Además, de las figuras [-@fig-ajustePoisson], [-@fig-ajustebinneg], [-@fig-ajustegeom], [-@fig-ajustebinom] se ve aprecia que las distribuciones de la clase $(a,b,1)$ son prácticamente indiscernibles respecto de las distribuciones correspondientes de la clase $(a,b,0)$. Además, en la  @tbl-parametrosFrecuencia se ve que no hay mucha diferencia en los parámetros y en el caso de las distribuciones modificadas, la probabilidad en cero estimada por máxima verosimilitud se redondea precisamente a cero.
+
+8. **Nombre de Resultado**: Prueba de bondad de ajuste de las distribuciones de frecuencia
+
+   **Resumen en una oración**: Se conduce una prueba chi cuadrado de bondad de ajuste sobre todas las doce distribuciones ajustadas y ninguna presenta resultados adecuados.  
+   
+   **Principal característica**: Se obtienen valores $p$ muy bajos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles de significancia usuales del $10\%$, $5\%$ y $1\%$. 
+   
+   **Problemas o posibles desafíos**: La eficacia del modelo agraegado va a estar fuertemente comprometido si el ajuste de de la frecuencia es inadecaudo. Se valora probar distribuciones, como la Poisson-Gaussiana inversa, o la Poisson-Geométrica en procura de una mayor flexibilidad.
+   
+   **Resumen en un párrafo**: En la @tbl-metricasFrecuencia se presenta el valor $p$ resultante de la prueba Chi-Cuadrado de bondad de ajuste. Se obtuvieron valores $p$ muy bajos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles de significancia usuales del $10\%$, $5\%$ y $1\%$, de modo que hay evidencia suficiente para rechazar la hipótesis de que la distribución de la frecuencia proviene de cualquiera de las propuestas. Sin embargo, para continuar con las instrucciones de la bitácora 3 y en ausencia de un modelo alternativo mejor, se toman las distribuciones con mayores valores $p$, que son las binomiales negativas. 
+   
+
+
+9. **Nombre de Resultado**: Medidas AIC y BIC para la frecuencia
+
+   **Resumen en una oración**: Los modelos binomial negativos tienen los valores más bajos de AIC y BIC, de entre los cuáles el mejor bajo estas medidas es el binomial negativo truncado en cero.
+   
+   **Principal característica**: El modelo de menor AIC y BIC es el binomial negativo truncado en cero, pero por una difencia ínfima respecto al binomial negativo.
+   
+   **Problemas o posibles desafíos**: No hay mucha diferencia entre las medidas para decantarse por el binomial negativo o el binomial negativo modificado en cero, al punto de que hay que recurrir a la sexta cifra decimal para decidir.
+   
+   **Resumen en un párrafo**: En la @tbl-metricasFrecuencia se presentan las medidas de AIC y BIC para cada modelo. Se ve que en general, los mejores modelos son los binomiales negativos, seguidos de los geométricos (que son casos especiales de los anteriores), Poisson y, por último, los binomiales. El modelo de menor AIC y BIC es el binomial negativo truncado en cero. Sin embargo, se observa que no hay mucha diferencia entre las medidas para decantarse por el binomial negativo o el binomial negativo modificado en cero, al punto de que hay que recurrir a la sexta cifra decimal para decidir.
+   
    
    |
 ### 3. Tablas
