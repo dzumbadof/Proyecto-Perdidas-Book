@@ -440,7 +440,7 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
 
 8. **Nombre de Resultado**: Prueba de bondad de ajuste de las distribuciones de frecuencia
 
-   **Resumen en una oración**: Se conduce una prueba chi cuadrado de bondad de ajuste sobre todas las doce distribuciones ajustadas y ninguna presenta resultados adecuados.  
+   **Resumen en una oración**: Se conduce una prueba Chi-Cuadrado de bondad de ajuste sobre todas las doce distribuciones ajustadas y ninguna presenta resultados adecuados.  
    
    **Principal característica**: Se obtienen valores $p$ muy bajos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles de significancia usuales del $10\%$, $5\%$ y $1\%$. 
    

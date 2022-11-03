@@ -13,9 +13,9 @@ book:
     - Bit2.qmd
     - Bit3.qmd
     #- Bit4.qmd
-    - references.qmd
+    - Referencias.qmd
 
-bibliography: references.bib
+bibliography: Referencias.bib
 csl: apa.csl
 format:
   html:
