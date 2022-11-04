@@ -523,77 +523,98 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
 
     | 
 
-    ### 3. Tablas
+### 3. Tablas
 
-    +-------------------------------+-------------------------------+
-    | Primarios                     | Secundarios                   |
-    +===============================+===============================+
-    | -   Teoría A: Estimación      | -   Teoría D: Uso de          |
-    |     paramétrica por máxima    |     distribuciones compuestas |
-    |     versolimiltud             |     para el ajuste de la      |
-    |                               |     frecuencia                |
-    | -   Teoría B: Selección de    |                               |
-    |     modelos con pruebas de    | -   Hipótesis B:              |
-    |     bondad de ajsute          |     Distribuciones compuestas |
-    |                               |     podrían dar mejores       |
-    | -   Teoría C: Selección de    |     resultados en el ajuste   |
-    |     modelos con el criterio   |     de la frecuencia al ser   |
-    ser |     de información de Akaike  |    flexibles(se v aloran |
-    |     infor(AIC) y el criterio de     por ejemplo las              |
- |     y el información bayesiano      distribuciones compuestas    |
- |     bayes(BIC)                |     Poisson-Poisson o Neyman     |
- |                               |     tipo A; Poiss                   | -   Resultado A: Ninguna de las     Polya-Aisson-Geométrica o |
-    |     distrlas ibuciones de las clase Poissonlya-Aeppli; y            |     (a,b,clases 0) o (a,b,1) son   |     Poisson-Gaussiana    |     
-    |
-  |  |  son adecuadas para        |     inversa)                  |
-    |     modelar la frecuencia de  |                               |
-    |     los reclamos.         s    |
-    |     frecuencia de los ramos.  |                               |
-    |                               |-   Hipótesis A: La, la        |
-    | -   Hipótesis A: La disbución |   iva es la que logística     |
-    |     logística generalda es la |    na el mejor ajuste más     |
-   que  |     más adecauda pelar la |    os datos de frecuencia     |
-   ajuste  |     severidaeclamos    |                               |
-   frecuencia-----------------------+------------------------------+    : Elementos de reporte
++---------------------------------+---------------------------------+
+| Primarios                       | Secundario                      |
++=================================+=================================+
+| -   Teoría A: Estimación        | -   Teoría D: Uso de            |
+|     paramétrica por máxima      |     distribuciones compuestas   |
+|     verosimilitud               |     para el ajuste de la        |
+|                                 |     frecuencia                  |
+| -   Teoría B: Selección de      |                                 |
+|     modelos distribucionales    | -   Hipótesis B: Distribuciones |
+|     con pruebas de bondad de    |     compuestas podrían dar un   |
+|     ajuste                      |     mejor ajuste de la          |
+|                                 |     frecuencia al ser máx       |
+| -   Teoría C: Selección de      |     flexibles (se valoran por   |
+|     modelos con el criterio de  |     ejmplo las distribuciones   |
+|     información de Akaike (AIC) |     compuestas Poisson-Poisson  |
+|     y el criterio de            |     o Neyman tipo A;            |
+|     información bayesiano (BIC) |     Poisson-Geométrica o        |
+|                                 |     Polya-Aeppli; y             |
+| -   Resultado A: Ninguna de las |     Poisson-Gaussiana inversa)  |
+|     distribuciones de las       |                                 |
+|     clases (a,b,0) o (a,b,1)    | -   Resultado B: De las         |
+|     son adecuadas para          |     distribuciones de la clase  |
+|     modelarla frecuencia de los |     (a,b,0) y (a,b,1), la       |
+|     reclamos.                   |     binomial negativa es la que |
+|                                 |     proporciona el mejor ajuste |
+| -   Hipótesis A: La             |     a los datos de frecuencia.  |
+|     distribución logística      |                                 |
+|     generalizada es la más      |                                 |
+|     adecuada para modelar la    |                                 |
+|     severidad de los reclamos.  |                                 |
++---------------------------------+---------------------------------+
 
-    +---------------+-----------------------------------------------------+
-    | Sección       | Temasatar                                      |
-    +:=============:+:==============================================:+
-    | Int roducción | 1.  ducción al modelado de pérdidas.           |
-    |               |Contextualización de la problemática surgida    |
-    |               |  r los daños a la propiedad y a lsurgida as personas   |
-    |            aeopuertos de Estados Unidos. las personas               |
-    |         |
-    |               |     Unidos.               | 3.  Teoría          de estimación paramétrica,pruebas de     |
-    |               |    ad de ajuste y pérdidas agregade das.          |
-    |               | ltados de estudios afines.                  |
-    +---------------+------------------------------------------------+
-    | Me todología  | 1.  Iucción de la base de datos y análisis     |
-    |                 escriptivo                       análisis               |
-    |                                                  |
-    |               | 2.  Método A: Estimación paramétrica vía máxima     |
-    |               | erosimilitud.                    máxima               |
-    |                                                    |
-    |               | 3.  Método B: Selección de modelos vía : AIC, BIC y |
-    |               |     as Chi-Cuadrado, Kolmogorov-SBIC y mirnov y      |
-    |          Anderson-Darling para modelos obteKolmogorov-Smirnov y nidos por     |
-    |                              odelos obtenidos por método   |                                                |
-    |               |     A.                                              |
-    |               |                                           |
-    |               | 4.  Método C: Método de recursión (Fórmula de       |
-    |               |     P) para los modelos seleccionados según    |
-    |               |  todo B.                         según               |
-    +---------------+------------------------------------------+
-    | R esultados   | 1.  Rado A:                                    |
-    |               |                                                |
-    |               | 2.  Rado B:                                    |
-    |               |                                                |
-    |               | 3.  Lciones de la metodología y los datos      |
-    |               |     (ente)                                     |
-    |               |                                           |
-    |               | 4.  Recomendaciones (pendiente)                     |
-    +---------------+------------------------------------------------+
+: Elementos de reporte
 
-Table: Distribución de conos por sección.
++---------------+----------------------------------------------------+
+| Sección       | Temas a tratar                                     |
++:=============:+:==================================================:+
+| Introducción  | 1.  Introducción al modelado de                    |
+|               |     pérdidas.(primario)                            |
+|               | 2.  Contextualización de la problemática surgida   |
+|               |     por los daños a la propiedad y a las personas  |
+|               |     en aeropuertos de Estados Unidos.(primario)    |
+|               | 3.  Teoría de estimación paramétrica,pruebas de    |
+|               |     bondad de ajuste y pérdidas agregadas.         |
+|               |     (primario)                                     |
+|               | 4.  Teoría de distribuciones compuestas para el    |
+|               |     ajuste de frecuencia.(secundario)              |
+|               | 5.  Resultados de estudios afines. (secundario)    |
++---------------+----------------------------------------------------+
+| Metodología   | 1.  Introducción de la base de datos y análisis    |
+|               |     descriptivo. (primario)                        |
+|               |                                                    |
+|               | 2.  Método A: Estimación paramétrica vía máxima    |
+|               |     verosimilitud. (primario)                      |
+|               |                                                    |
+|               | 3.  Método B: Uso de distribuciones compuestas     |
+|               |     para ajustar la frecuencia de                  |
+|               |     reclamos.(secundarios)                         |
+|               |                                                    |
+|               | 4.  Selección de modelos mediante pruebas de       |
+|               |     bondad de ajuste: Chi-Cuadrado,                |
+|               |     Kolmogorov-Smirnov y Anderson-Darling para     |
+|               |     modelos obtenidos por método A. (primario)     |
+|               |                                                    |
+|               | 5.  Selección de modelos mediante AIC y BIC.       |
+|               |     (primario).                                    |
+|               |                                                    |
+|               | 6.  Método de recursión (Fórmula de Panjer) para   |
+|               |     los modelos seleccionados según método B.      |
+|               |     (secundario)                                   |
++---------------+----------------------------------------------------+
+| Resultados    | 1.  Resultado A: Ninguna de las distribuciones de  |
+|               |     las clases (a,b,0) o (a,b,1) son adecuadas     |
+|               |     para modelar la frecuencia de                  |
+|               |     reclamos.(primario)                            |
+|               |                                                    |
+|               | 2.  Resultado B: Entre las distribuciones de       |
+|               |     clases (a,b,0) y (a,b,1) la binomial negativa  |
+|               |     es la que proporciona el mejor ajuste a los    |
+|               |     datos de frecuencia.(secundario)               |
+|               |                                                    |
+|               | 3.  Resultado C: Entre las distribuciones de       |
+|               |     severidad utilizadas para el ajuste de         |
+|               |     severidad la logística generalizadas es la más |
+|               |     adecuada para modelar la severidad de          |
+|               |     reclamos. (primario)                           |
++---------------+----------------------------------------------------+
+|               |                                                    |
++---------------+----------------------------------------------------+
+
+: Distribución de contenidos por sección.
 
 ## Parte de escritura
