@@ -389,34 +389,93 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
 
 ### 2. Fichas de resultados
 
--   
+1.  **Nombre de Resultado**: Ajuste visual de la Severidad
 
-    1.  
+    **Resumen en una oración**: En la @fig-denscompSeveridad y 
+    @fig-cdfcompSeveridad se observa uqe logística generalizada, Johnson SU y 
+    Weibull ajustan mejor a la severidad.
 
-    -   Nombre de Resultado: Ajuste visual de la distribuciones de la
-        severidad +Resumen en una oración: La @fig-denscompSeveridad y
-        @fig-cdfcompSeveridad muestran que la logística generalizada,
-        Weibull y Johnson SU se acerca mejor a los datos de la severidad
-        +Principal característica: +Problemas o posibles desafíos:
-        +Resumen en un párrafo:
+    **Principal característica**: Ovservando la @fig-cdfcompSeveridad, estas 
+    tres distribuciones se acercan más a la función de distribución empírica. 
 
-2.  +Nombre de Resultado: kolmogorov-Smirnov da mejor para logistica
-    generalizada +Resumen en una oración: +Principal característica:
-    +Problemas o posibles desafíos: +Resumen en un párrafo:
+    **Problemas o posibles desafíos**: La logística generalizada y Johnson SU 
+    son distribuciones de 3 y 4 parámtetros respectivamente lo que puede 
+    afectar el principio de parsimonía. 
 
-3.  +Nombre de Resultado: Anderson-Darling da mejor para logistica
-    generalizada +Resumen en una oración: +Principal característica:
-    +Problemas o posibles desafíos: +Resumen en un párrafo:
+    **Resumen en un párrafo**: En la @fig-denscompSeveridad se observa que 
+    la exponencial no presenta ningún tipo de simetría, la cual sí se aprecia 
+    en el histograma de la severidad. Por otro lado, la log-normal y la gamma 
+    no parecen coincidir en la centralidad, aparte de que presetan más peso en 
+    la cola derecha. La distirbuciones de logística generalizada, weibull y 
+    Johnson SU parecen ajustarse mejor al histograma y las tres presentan una 
+    forma similar. Al observar la @fig-cdfcompSeveridad se aprecia un 
+    comportamiento similar: la exponencial parece estar muy lejos mientras que 
+    las tres ya mencionados se acercan bastante a la distribución empírica, 
+    y la logística generalizada parece ser la que sigue más cercanamente. 
 
-4.  Nombre de Resultado: Ajuste visual de la distribuciones de la
-    severidad Resumen en una oración: Principal característica:
-    Problemas o posibles desafíos: Resumen en un párrafo:
+2.  **Nombre de Resultado**: Ajuste bajo la prueba de kolmogorov-Smirnov
+    para la severidad.
 
-5.  Nombre de Resultado: Ajuste visual de la distribuciones de la
-    severidad Resumen en una oración: Principal característica:
-    Problemas o posibles desafíos: Resumen en un párrafo:
+    **Resumen en una oración**: Se confirma que la Johnson SU, logística 
+    generalizada y weibull proporcionan buen ajuste para la severidad.
 
-6.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
+    **Principal característica**: Se da un no rechazo de la hipótesis nula 
+    para las distribuciones mencionadas con un nivel de significancia de 0.05.
+
+    **Problemas o posibles desafíos**: Ninguna adicional al ya discutido
+
+    **Resumen en un párrafo**: Para una significancia de 0.05 se tiene un valor 
+    crítico de $0.1962991$, por lo que se rechaza la hipótesis de bondad de 
+    ajuste para la gamma, la exponencial y la log-normal, y se acepta para la 
+    Johnson SU, logística generalizada y weibull. Además, note que el 
+    estadístico más bajo obtenido es para la logística generalizada. Bajo una 
+    significancia de 0.01 se obtiene un valor crítico de $0.2352702$, por lo 
+    que se rechaza rotundamente la log-normal y la exponencial como 
+    distribuciones candidatas para la severidad bajo esta prueba. 
+
+    
+
+3.  **Nombre de Resultado**: Ajuste bajo la prueba de Anderson-Darling para
+    la severidad
+
+    **Resumen en una oración**: Se confirma que la Johnson SU, logística 
+    generalizada y weibull proporcionan buen ajuste para la severidad.
+
+    **Principal característica**: Se da un no rechazo de la hipótesis nula 
+    para las distribuciones mencionadas con un nivel de significancia de 0.05.
+
+    **Problemas o posibles desafíos**: Ninguna adicional al ya discutido
+
+    **Resumen en un párrafo**: Para una significancia de 0.05 se tiene un valor 
+    crítico de $2.492$, por lo que se rechaza la hipótesis de bondad de 
+    ajuste para la log-normal y exponencial, y se acepta para la Johnson SU, 
+    logística generalizada, weibull y gamma. Además, note que el 
+    estadístico más bajo obtenido es para la logística generalizada. Bajo una 
+    significancia de 0.01 se obtiene un valor crítico de $3.857$, por lo 
+    que se rechaza rotundamente la exponencial como distribuciones candidatas 
+    para la severidad bajo esta prueba.
+
+4.  **Nombre de Resultado**: AIC, BIC y versosimilitud para la severidad
+
+    **Resumen en una oración**: La logística generalizada obtiene la menor 
+    verosimilitud, AIC y BIC lo que confirma que esta es la mejor candidata
+    para la severidad.
+
+    **Principal característica**: Bajo los criterios de AIC, BIC y verosimilitud
+    se confirma que las mejores candidatas son la logística generalizada, 
+    Johnson SU y Weibull
+
+    **Problemas o posibles desafíos**: Ninguna adicional al ya discutido
+
+    **Resumen en un párrafo**: Entre las distribuciones ajustadas la logística 
+    generalizada presenta el menor valor para la verosimilitud, seguido por la 
+    Johnson SU y luego la Weibull. Este mismo comportamiento se repite con el 
+    caso del BIC. También se obtiene un menor valor de AIC para la logística, 
+    seguido por la Weibull y la Johnson SU . lo cual confirma lo que ya se 
+    había observado. Esto proporciona aún más evidencia de que la logística 
+    generalizada es la mejor candidata.
+
+5.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
     $(a,b,0)$ para la frecuencia
 
     **Resumen en una oración**: Se grafican las CDF empíricas contra las
@@ -440,7 +499,7 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
     parametrización de $\texttt{R}$. Los resultado para las demás
     distribuciones, se resumen en la @tbl-parametrosFrecuencia.
 
-7.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
+6.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
     $(a,b,1)$ para la frecuencia
 
     **Resumen en una oración**: Se grafican las CDF empíricas contra las
@@ -470,7 +529,7 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
     probabilidad en cero estimada por máxima verosimilitud se redondea
     precisamente a cero.
 
-8.  **Nombre de Resultado**: Prueba de bondad de ajuste de las
+7.  **Nombre de Resultado**: Prueba de bondad de ajuste de las
     distribuciones de frecuencia
 
     **Resumen en una oración**: Se conduce una prueba Chi-Cuadrado de
@@ -498,7 +557,7 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
     de un modelo alternativo mejor, se toman las distribuciones con
     mayores valores $p$, que son las binomiales negativas.
 
-9.  **Nombre de Resultado**: Medidas AIC y BIC para la frecuencia
+8.  **Nombre de Resultado**: Medidas AIC y BIC para la frecuencia
 
     **Resumen en una oración**: Los modelos binomial negativos tienen
     los valores más bajos de AIC y BIC, de entre los cuáles el mejor
