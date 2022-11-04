@@ -1,3 +1,9 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
 # Bitácora 3
 
 ## Parte de Planificación
@@ -62,14 +68,11 @@ datos_agregados <- datos_agregados %>%
 
 ```
 
-
 #### Ajuste de la frecuencia
-
 
 ```{r Distribución empírica frecuencia, echo=FALSE}
 F_N <- ecdf(datos_agregados$N)
 ```
-
 
 @fig-ajustePoisson
 
@@ -104,6 +107,7 @@ fit_ZMNbinom <- fitdist(data = datos_agregados$N, distr = "zmnbinom", method = "
 cdfcomp(list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial\n negativa","Truncada","Modificada"))
 # gofstat(list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom))
 ```
+
 @fig-ajustegeom
 
 ```{r Ajuste Geométrica, echo=FALSE, warning=FALSE}
@@ -196,6 +200,7 @@ cdfcomp(list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="Ajustes distribución b
 #| 
 cdfcomp(list(fit_Poisson, fit_Geom, fit_Nbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
 ```
+
 @fig-ajusteab1trunc
 
 ```{r Familia (a,b,1) truncadas , echo=FALSE}
@@ -205,6 +210,7 @@ cdfcomp(list(fit_Poisson, fit_Geom, fit_Nbinom, fit_ZTBinom), main="", xlab="Dat
 
 cdfcomp(list(fit_ZTPoisson, fit_ZTGeom, fit_ZTNbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
 ```
+
 @fig-ajusteab1mod
 
 ```{r Familia (a,b,1) modificadas , echo=FALSE}
@@ -227,7 +233,6 @@ cdfcomp(list(fit_ZMPoisson, fit_ZMGeom, fit_ZMNbinom, fit_ZMBinom), main="", xla
 # cdfcomp(fit_PolyaAeppli)
 # gofstat(fit_PolyaAeppli, discrete = TRUE)
 ```
-
 
 ```{r}
 #| echo: false
@@ -306,8 +311,6 @@ kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options 
   row_spec(0,bold=TRUE)
 ```
 
-
-
 #### Ajuste de la severidad
 
 ```{r}
@@ -383,112 +386,214 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
 ```
 
 ### 2. Fichas de resultados
-* 1. 
-    + Nombre de Resultado: Ajuste visual de la distribuciones de la severidad 
-    +Resumen en una oración: La @fig-denscompSeveridad y 
-   @fig-cdfcompSeveridad muestran que la logística generalizada, Weibull y 
-   Johnson SU se acerca mejor a los datos de la severidad
-   +Principal característica: 
-   +Problemas o posibles desafíos: 
-   +Resumen en un párrafo: 
-   
-2. 
-    +Nombre de Resultado: kolmogorov-Smirnov da mejor para logistica generalizada
-    +Resumen en una oración: 
-    +Principal característica:
-    +Problemas o posibles desafíos: 
-    +Resumen en un párrafo: 
-    
-3. 
-    +Nombre de Resultado: Anderson-Darling da mejor para logistica generalizada
-    +Resumen en una oración: 
-    +Principal característica:
-    +Problemas o posibles desafíos: 
-    +Resumen en un párrafo: 
-   
-4. Nombre de Resultado: Ajuste visual de la distribuciones de la severidad
-   Resumen en una oración: 
-   Principal característica:
-   Problemas o posibles desafíos: 
-   Resumen en un párrafo:
-   
-5. Nombre de Resultado: Ajuste visual de la distribuciones de la severidad
-   Resumen en una oración: 
-   Principal característica:
-   Problemas o posibles desafíos: 
-   Resumen en un párrafo: 
-   
-6. **Nombre de Resultado**: Ajuste visual de la distribuciones de clase $(a,b,0)$ para la frecuencia
 
-   **Resumen en una oración**: Se grafican las CDF empíricas contra las teóricas y ningún ajuste es bueno.
-   
-   **Principal característica**: La distribución binomial negativa parece el mejor ajuste.
-   
-   **Problemas o posibles desafíos**: Ninguna de las distribuciones básicas de frecuencia logra emular la forma de la distribución empírica, por lo que deben buscarse otras distribuciones discretas que posean una mayor flexibilidad. Además, se presentaron muchas dificultades de índole numérica 
-   
-   **Resumen en un párrafo**: En la @fig-ajusteab0 se presentan los ajustes de las distribuciones de la clase $(a,b,0)$ para modelar la frecuencia de los reclamos. Ninguna parece emular suficientemente bien la forma de la distribución empírica, siendo la binomial negativa la que parece hacerlo mejor. Para esta distribución, se obtuvieron los parámetros $n=8$ y $p =265.49$ según la parametrización de $\texttt{R}$. Los resultado para las demás distribuciones, se resumen en la @tbl-parametrosFrecuencia.  
+-   
 
-7. **Nombre de Resultado**: Ajuste visual de la distribuciones de clase $(a,b,1)$ para la frecuencia
+    1.  
 
-   **Resumen en una oración**: Se grafican las CDF empíricas contra las teóricas y ningún ajuste es bueno.
-   
-   **Principal característica**: La distribución binomial negativa parece el mejor ajuste, tanto en el caso truncado como en el modificado.
-   
-   **Problemas o posibles desafíos**: Ninguna de las distribuciones básicas de la familia $(a,b,1)$ logra emular la forma de la distribución empírica, de forma que debe explorarse alguna alternativa que permita una mayor flexibilidad.
-   
-   **Resumen en un párrafo**: En las figuras [-@fig-ajusteab1trunc] y [-@fig-ajusteab1mod] se presentan los ajustes de las distribuciones de la clase $(a,b,1)$ para modelar la frecuencia de los reclamos. Ninguna parece emular suficientemente bien la forma de la distribución empírica, siendo la binomial negativa la que parece hacerlo mejor en ambos casos. Además, de las figuras [-@fig-ajustePoisson], [-@fig-ajustebinneg], [-@fig-ajustegeom], [-@fig-ajustebinom] se ve aprecia que las distribuciones de la clase $(a,b,1)$ son prácticamente indiscernibles respecto de las distribuciones correspondientes de la clase $(a,b,0)$. Además, en la  @tbl-parametrosFrecuencia se ve que no hay mucha diferencia en los parámetros y en el caso de las distribuciones modificadas, la probabilidad en cero estimada por máxima verosimilitud se redondea precisamente a cero.
+    -   Nombre de Resultado: Ajuste visual de la distribuciones de la
+        severidad +Resumen en una oración: La @fig-denscompSeveridad y
+        @fig-cdfcompSeveridad muestran que la logística generalizada,
+        Weibull y Johnson SU se acerca mejor a los datos de la severidad
+        +Principal característica: +Problemas o posibles desafíos:
+        +Resumen en un párrafo:
 
-8. **Nombre de Resultado**: Prueba de bondad de ajuste de las distribuciones de frecuencia
+2.  +Nombre de Resultado: kolmogorov-Smirnov da mejor para logistica
+    generalizada +Resumen en una oración: +Principal característica:
+    +Problemas o posibles desafíos: +Resumen en un párrafo:
 
-   **Resumen en una oración**: Se conduce una prueba Chi-Cuadrado de bondad de ajuste sobre todas las doce distribuciones ajustadas y ninguna presenta resultados adecuados.  
-   
-   **Principal característica**: Se obtienen valores $p$ muy bajos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles de significancia usuales del $10\%$, $5\%$ y $1\%$. 
-   
-   **Problemas o posibles desafíos**: La eficacia del modelo agraegado va a estar fuertemente comprometido si el ajuste de de la frecuencia es inadecaudo. Se valora probar distribuciones, como la Poisson-Gaussiana inversa, o la Poisson-Geométrica en procura de una mayor flexibilidad.
-   
-   **Resumen en un párrafo**: En la @tbl-metricasFrecuencia se presenta el valor $p$ resultante de la prueba Chi-Cuadrado de bondad de ajuste. Se obtuvieron valores $p$ muy bajos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles de significancia usuales del $10\%$, $5\%$ y $1\%$, de modo que hay evidencia suficiente para rechazar la hipótesis de que la distribución de la frecuencia proviene de cualquiera de las propuestas. Sin embargo, para continuar con las instrucciones de la bitácora 3 y en ausencia de un modelo alternativo mejor, se toman las distribuciones con mayores valores $p$, que son las binomiales negativas. 
-   
+3.  +Nombre de Resultado: Anderson-Darling da mejor para logistica
+    generalizada +Resumen en una oración: +Principal característica:
+    +Problemas o posibles desafíos: +Resumen en un párrafo:
 
+4.  Nombre de Resultado: Ajuste visual de la distribuciones de la
+    severidad Resumen en una oración: Principal característica:
+    Problemas o posibles desafíos: Resumen en un párrafo:
 
-9. **Nombre de Resultado**: Medidas AIC y BIC para la frecuencia
+5.  Nombre de Resultado: Ajuste visual de la distribuciones de la
+    severidad Resumen en una oración: Principal característica:
+    Problemas o posibles desafíos: Resumen en un párrafo:
 
-   **Resumen en una oración**: Los modelos binomial negativos tienen los valores más bajos de AIC y BIC, de entre los cuáles el mejor bajo estas medidas es el binomial negativo truncado en cero.
-   
-   **Principal característica**: El modelo de menor AIC y BIC es el binomial negativo truncado en cero, pero por una difencia ínfima respecto al binomial negativo.
-   
-   **Problemas o posibles desafíos**: No hay mucha diferencia entre las medidas para decantarse por el binomial negativo o el binomial negativo modificado en cero, al punto de que hay que recurrir a la sexta cifra decimal para decidir.
-   
-   **Resumen en un párrafo**: En la @tbl-metricasFrecuencia se presentan las medidas de AIC y BIC para cada modelo. Se ve que en general, los mejores modelos son los binomiales negativos, seguidos de los geométricos (que son casos especiales de los anteriores), Poisson y, por último, los binomiales. El modelo de menor AIC y BIC es el binomial negativo truncado en cero. Sin embargo, se observa que no hay mucha diferencia entre las medidas para decantarse por el binomial negativo o el binomial negativo modificado en cero, al punto de que hay que recurrir a la sexta cifra decimal para decidir.
-   
-   
-   |
-### 3. Tablas
-+------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Sección          | Temas a tratar                                                                                                                                           |
-+:================:+:========================================================================================================================================================:+
-| Introducción     | 1.  Introducción al modelado de pérdidas.                                                                                                                |
-|                  | 2.  Contextualización de la problemática surgida por los daños a la propiedad y a las personas en aeropuertos de Estados Unidos.                         |
-|                  | 3.  Teoría de estimación paramétrica,pruebas de bondad de ajuste y pérdidas agregadas.                                                                   |
-|                  | 4.  Resultados de estudios afines.                                                                                                                       |
-+------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Metodología      | 1.  Introducción de la base de datos y análisis descriptivo                                                                                              |
-|                  |                                                                                                                                                          |
-|                  | 2.  Método A: Estimación paramétrica vía máxima verosimilitud.                                                                                           |
-|                  |                                                                                                                                                          |
-|                  | 3.   Método B: Selección de modelos vía : AIC, BIC y pruebas Chi-Cuadrado, Kolmogorov-Smirnov y Anderson-Darling para modelos obtenidos por método A.    |
-|                  |                                                                                                                                                          |
-|                  | 4.  Método C: Método de recursión (Fórmula de Panjer) para los modelos seleccionados según método B.                                                     |
-+------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Resultados       | 1.  Resultado A:                                                                                                                                         |
-|                  |                                                                                                                                                          |
-|                  | 2.  Resultado B:                                                                                                                                         |
-|                  |                                                                                                                                                          |
-|                  | 3.  Limitaciones de la metodología y los datos (pendiente)                                                                                               |
-|                  |                                                                                                                                                          |
-|                  | 4.  Recomendaciones (pendiente)                                                                                                                          |
-+------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+
+6.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
+    $(a,b,0)$ para la frecuencia
 
-Table: Distribución de contenidos por sección.
+    **Resumen en una oración**: Se grafican las CDF empíricas contra las
+    teóricas y ningún ajuste es bueno.
 
+    **Principal característica**: La distribución binomial negativa
+    parece el mejor ajuste.
+
+    **Problemas o posibles desafíos**: Ninguna de las distribuciones
+    básicas de frecuencia logra emular la forma de la distribución
+    empírica, por lo que deben buscarse otras distribuciones discretas
+    que posean una mayor flexibilidad. Además, se presentaron muchas
+    dificultades de índole numérica
+
+    **Resumen en un párrafo**: En la @fig-ajusteab0 se presentan los
+    ajustes de las distribuciones de la clase $(a,b,0)$ para modelar la
+    frecuencia de los reclamos. Ninguna parece emular suficientemente
+    bien la forma de la distribución empírica, siendo la binomial
+    negativa la que parece hacerlo mejor. Para esta distribución, se
+    obtuvieron los parámetros $n=8$ y $p =265.49$ según la
+    parametrización de $\texttt{R}$. Los resultado para las demás
+    distribuciones, se resumen en la @tbl-parametrosFrecuencia.
+
+7.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
+    $(a,b,1)$ para la frecuencia
+
+    **Resumen en una oración**: Se grafican las CDF empíricas contra las
+    teóricas y ningún ajuste es bueno.
+
+    **Principal característica**: La distribución binomial negativa
+    parece el mejor ajuste, tanto en el caso truncado como en el
+    modificado.
+
+    **Problemas o posibles desafíos**: Ninguna de las distribuciones
+    básicas de la familia $(a,b,1)$ logra emular la forma de la
+    distribución empírica, de forma que debe explorarse alguna
+    alternativa que permita una mayor flexibilidad.
+
+    **Resumen en un párrafo**: En las figuras [-@fig-ajusteab1trunc] y
+    [-@fig-ajusteab1mod] se presentan los ajustes de las distribuciones
+    de la clase $(a,b,1)$ para modelar la frecuencia de los reclamos.
+    Ninguna parece emular suficientemente bien la forma de la
+    distribución empírica, siendo la binomial negativa la que parece
+    hacerlo mejor en ambos casos. Además, de las figuras
+    [-@fig-ajustePoisson], [-@fig-ajustebinneg], [-@fig-ajustegeom],
+    [-@fig-ajustebinom] se ve aprecia que las distribuciones de la clase
+    $(a,b,1)$ son prácticamente indiscernibles respecto de las
+    distribuciones correspondientes de la clase $(a,b,0)$. Además, en la
+    @tbl-parametrosFrecuencia se ve que no hay mucha diferencia en los
+    parámetros y en el caso de las distribuciones modificadas, la
+    probabilidad en cero estimada por máxima verosimilitud se redondea
+    precisamente a cero.
+
+8.  **Nombre de Resultado**: Prueba de bondad de ajuste de las
+    distribuciones de frecuencia
+
+    **Resumen en una oración**: Se conduce una prueba Chi-Cuadrado de
+    bondad de ajuste sobre todas las doce distribuciones ajustadas y
+    ninguna presenta resultados adecuados.
+
+    **Principal característica**: Se obtienen valores $p$ muy bajos, con
+    lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles
+    de significancia usuales del $10\%$, $5\%$ y $1\%$.
+
+    **Problemas o posibles desafíos**: La eficacia del modelo agraegado
+    va a estar fuertemente comprometido si el ajuste de de la frecuencia
+    es inadecaudo. Se valora probar distribuciones, como la
+    Poisson-Gaussiana inversa, o la Poisson-Geométrica en procura de una
+    mayor flexibilidad.
+
+    **Resumen en un párrafo**: En la @tbl-metricasFrecuencia se presenta
+    el valor $p$ resultante de la prueba Chi-Cuadrado de bondad de
+    ajuste. Se obtuvieron valores $p$ muy bajos, con lo que se rechaza
+    la hipótesis de bondad de ajuste bajo los niveles de significancia
+    usuales del $10\%$, $5\%$ y $1\%$, de modo que hay evidencia
+    suficiente para rechazar la hipótesis de que la distribución de la
+    frecuencia proviene de cualquiera de las propuestas. Sin embargo,
+    para continuar con las instrucciones de la bitácora 3 y en ausencia
+    de un modelo alternativo mejor, se toman las distribuciones con
+    mayores valores $p$, que son las binomiales negativas.
+
+9.  **Nombre de Resultado**: Medidas AIC y BIC para la frecuencia
+
+    **Resumen en una oración**: Los modelos binomial negativos tienen
+    los valores más bajos de AIC y BIC, de entre los cuáles el mejor
+    bajo estas medidas es el binomial negativo truncado en cero.
+
+    **Principal característica**: El modelo de menor AIC y BIC es el
+    binomial negativo truncado en cero, pero por una difencia ínfima
+    respecto al binomial negativo.
+
+    **Problemas o posibles desafíos**: No hay mucha diferencia entre las
+    medidas para decantarse por el binomial negativo o el binomial
+    negativo modificado en cero, al punto de que hay que recurrir a la
+    sexta cifra decimal para decidir.
+
+    **Resumen en un párrafo**: En la @tbl-metricasFrecuencia se
+    presentan las medidas de AIC y BIC para cada modelo. Se ve que en
+    general, los mejores modelos son los binomiales negativos, seguidos
+    de los geométricos (que son casos especiales de los anteriores),
+    Poisson y, por último, los binomiales. El modelo de menor AIC y BIC
+    es el binomial negativo truncado en cero. Sin embargo, se observa
+    que no hay mucha diferencia entre las medidas para decantarse por el
+    binomial negativo o el binomial negativo modificado en cero, al
+    punto de que hay que recurrir a la sexta cifra decimal para decidir.
+
+    | 
+
+    ### 3. Tablas
+
+    +-------------------------------+-------------------------------+
+    | Primarios                     | Secundarios                   |
+    +===============================+===============================+
+    | -   Teoría A: Estimación      | -   Teoría D: Uso de          |
+    |     paramétrica por máxima    |     distribuciones compuestas |
+    |     versolimiltud             |     para el ajuste de la      |
+    |                               |     frecuencia                |
+    | -   Teoría B: Selección de    |                               |
+    |     modelos con pruebas de    | -   Hipótesis B:              |
+    |     bondad de ajsute          |     Distribuciones compuestas |
+    |                               |     podrían dar mejores       |
+    | -   Teoría C: Selección de    |     resultados en el ajuste   |
+    |     modelos con el criterio   |     de la frecuencia al ser   |
+    ser |     de información de Akaike  |    flexibles(se v aloran |
+    |     infor(AIC) y el criterio de     por ejemplo las              |
+ |     y el información bayesiano      distribuciones compuestas    |
+ |     bayes(BIC)                |     Poisson-Poisson o Neyman     |
+ |                               |     tipo A; Poiss                   | -   Resultado A: Ninguna de las     Polya-Aisson-Geométrica o |
+    |     distrlas ibuciones de las clase Poissonlya-Aeppli; y            |     (a,b,clases 0) o (a,b,1) son   |     Poisson-Gaussiana    |     
+    |
+  |  |  son adecuadas para        |     inversa)                  |
+    |     modelar la frecuencia de  |                               |
+    |     los reclamos.         s    |
+    |     frecuencia de los ramos.  |                               |
+    |                               |-   Hipótesis A: La, la        |
+    | -   Hipótesis A: La disbución |   iva es la que logística     |
+    |     logística generalda es la |    na el mejor ajuste más     |
+   que  |     más adecauda pelar la |    os datos de frecuencia     |
+   ajuste  |     severidaeclamos    |                               |
+   frecuencia-----------------------+------------------------------+    : Elementos de reporte
+
+    +---------------+-----------------------------------------------------+
+    | Sección       | Temasatar                                      |
+    +:=============:+:==============================================:+
+    | Int roducción | 1.  ducción al modelado de pérdidas.           |
+    |               |Contextualización de la problemática surgida    |
+    |               |  r los daños a la propiedad y a lsurgida as personas   |
+    |            aeopuertos de Estados Unidos. las personas               |
+    |         |
+    |               |     Unidos.               | 3.  Teoría          de estimación paramétrica,pruebas de     |
+    |               |    ad de ajuste y pérdidas agregade das.          |
+    |               | ltados de estudios afines.                  |
+    +---------------+------------------------------------------------+
+    | Me todología  | 1.  Iucción de la base de datos y análisis     |
+    |                 escriptivo                       análisis               |
+    |                                                  |
+    |               | 2.  Método A: Estimación paramétrica vía máxima     |
+    |               | erosimilitud.                    máxima               |
+    |                                                    |
+    |               | 3.  Método B: Selección de modelos vía : AIC, BIC y |
+    |               |     as Chi-Cuadrado, Kolmogorov-SBIC y mirnov y      |
+    |          Anderson-Darling para modelos obteKolmogorov-Smirnov y nidos por     |
+    |                              odelos obtenidos por método   |                                                |
+    |               |     A.                                              |
+    |               |                                           |
+    |               | 4.  Método C: Método de recursión (Fórmula de       |
+    |               |     P) para los modelos seleccionados según    |
+    |               |  todo B.                         según               |
+    +---------------+------------------------------------------+
+    | R esultados   | 1.  Rado A:                                    |
+    |               |                                                |
+    |               | 2.  Rado B:                                    |
+    |               |                                                |
+    |               | 3.  Lciones de la metodología y los datos      |
+    |               |     (ente)                                     |
+    |               |                                           |
+    |               | 4.  Recomendaciones (pendiente)                     |
+    +---------------+------------------------------------------------+
+
+Table: Distribución de conos por sección.
 
 ## Parte de escritura
