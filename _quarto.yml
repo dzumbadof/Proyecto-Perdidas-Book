@@ -32,7 +32,8 @@ format:
     lof: true
     lot: true
     fig-pos: 'H'
-
+    fig-cap-location: top
+    tbl-cap-location: top
 editor: source
 
 geometry:

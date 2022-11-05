@@ -154,7 +154,7 @@ fit_ZTBinom <- fitdist(data = datos_agregados$N, dist = "ztbinom", method = "mle
 
 fit_ZMBinom <- fitdist(data = datos_agregados$N, dist = "zmbinom", method = "mle", start = list(prob = 0.5, size = m+500, p0=0.01), lower=c(0, m-1, 0), upper=c(1, Inf, 1))
 
-cdfcomp(cex=0.8, list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="Ajustes distribución binomial", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial","Truncada","Modificada"))
+cdfcomp(cex=0.8, list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial","Truncada","Modificada"))
         
 # gofstat(list(fit_Binom, fit_ZTBinom, fit_ZMBinom))
 
@@ -363,7 +363,7 @@ goftest <- gofstat(list(fit_lnorm, fit_exp, fit_gamma,
 
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 #| echo: false
 #| fig-cap: "Densidad de las distribuciones ajustadas con MLE"
 #| label: fig-denscompSeveridad
