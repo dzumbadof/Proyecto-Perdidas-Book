@@ -8,7 +8,7 @@ editor:
 
 ## Parte de Planificación
 
-### 1. Ajuste del modelo
+### Ajuste de la frecuencia
 
 ```{r echo=FALSE, message=FALSE, warning=TRUE}
 #| output: false
@@ -68,13 +68,15 @@ datos_agregados <- datos_agregados %>%
 
 ```
 
-#### Ajuste de la frecuencia
 
 ```{r Distribución empírica frecuencia, echo=FALSE}
 F_N <- ecdf(datos_agregados$N)
 ```
 
-En la @fig-ajustePoisson se muestra el ajuste de la distribución Poisson, y su versión truncada y modificada en cero, donde se comprueba que estas no difieren mucho entre sí, aparte de que se observa que el ajuste no es bueno.
+En la @fig-ajustePoisson se muestra el ajuste de la distribución
+Poisson, y su versión truncada y modificada en cero, donde se comprueba
+que estas no difieren mucho entre sí, aparte de que se observa que el
+ajuste no es bueno.
 
 ```{r Ajuste Poisson, echo=FALSE, warning=FALSE}
 #| fig-cap: "Ajustes distribución Poisson"
@@ -86,13 +88,17 @@ fit_ZTPoisson <- fitdist(data = datos_agregados$N,distr = "ztpois", method = "ml
 
 fit_ZMPoisson <- fitdist(data = datos_agregados$N,distr = "zmpois", method = "mle", start = list(lambda=10, p0=0.1), lower=c(0,0), upper=c(Inf, 1))
 
-cdfcomp(list(fit_Poisson, fit_ZTPoisson, fit_ZMPoisson),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Truncada","Modificada"))
+cdfcomp(cex=0.8, list(fit_Poisson, fit_ZTPoisson, fit_ZMPoisson),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Truncada","Modificada"))
 
 # gofstat(list(fit_Poisson, fit_ZTPoisson, fit_ZMPoisson))
 
 ```
 
-En la @fig-ajustebinneg se muestra el ajuste de la distribución binomial negativa, y su versión truncada y modificada en cero, donde se comprueba que estas no difieren mucho entre sí, aparte de que se observa que el ajuste es un poco mejor que el de la Poisson, sin llegar a ser satisfactorio.
+En la @fig-ajustebinneg se muestra el ajuste de la distribución binomial
+negativa, y su versión truncada y modificada en cero, donde se comprueba
+que estas no difieren mucho entre sí, aparte de que se observa que el
+ajuste es un poco mejor que el de la Poisson, sin llegar a ser
+satisfactorio.
 
 ```{r Ajuste Binomial negativa, echo=FALSE, warning=FALSE}
 #| fig-cap: "Ajustes distribución binomial negativa"
@@ -105,12 +111,16 @@ fit_ZTNbinom <- fitdist(data = datos_agregados$N, distr = "ztnbinom", method = "
 
 fit_ZMNbinom <- fitdist(data = datos_agregados$N, distr = "zmnbinom", method = "mle", start = list(size=1, prob=0.3, p0=0.3),  lower=c(0, 0, 0), upper=c(Inf, 1, 1))
 
-cdfcomp(list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial\n negativa","Truncada","Modificada"))
+cdfcomp(cex=0.8, list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial\n negativa","Truncada","Modificada"))
 # gofstat(list(fit_Nbinom, fit_ZTNbinom, fit_ZMNbinom))
 ```
 
-
-En la @fig-ajustegeom se muestra el ajuste de la distribución geométrica, y su versión truncada y modificada en cero, donde se comprueba que estas no se diferencian mucho. Siendo esta distribución un caso particular de la binomial negativa, se ve que el ajuste es muy inferior al del caso general. No es claro si el ajuste de la geométrica es mejor al de la Poisson.
+En la @fig-ajustegeom se muestra el ajuste de la distribución
+geométrica, y su versión truncada y modificada en cero, donde se
+comprueba que estas no se diferencian mucho. Siendo esta distribución un
+caso particular de la binomial negativa, se ve que el ajuste es muy
+inferior al del caso general. No es claro si el ajuste de la geométrica
+es mejor al de la Poisson.
 
 ```{r Ajuste Geométrica, echo=FALSE, warning=FALSE}
 #| fig-cap: "Ajustes distribución geométrica"
@@ -124,11 +134,13 @@ fit_ZTGeom <- fitdist(data = datos_agregados$N, distr = "ztgeom", method = "mle"
 fit_ZMGeom <- fitdist(data = datos_agregados$N, distr = "zmgeom", method = "mle",  start = list(prob = 0.8, p0=0.3), lower=c( 0, 0), upper=c(1, 1))
 
 
-cdfcomp(list(fit_Geom, fit_ZTGeom, fit_ZMGeom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Geométrica","Truncada","Modificada"))
+cdfcomp(cex=0.8, list(fit_Geom, fit_ZTGeom, fit_ZMGeom),main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Geométrica","Truncada","Modificada"))
 # gofstat(list(fit_Geom, fit_ZTGeom, fit_ZMGeom))
 ```
 
-A continuación, en la @fig-ajustebinom, se presenta el ajuste de la distribución binomial, el cual luce similar al de la Poisson y se ve que no es muy bueno.
+A continuación, en la @fig-ajustebinom, se presenta el ajuste de la
+distribución binomial, el cual luce similar al de la Poisson y se ve que
+no es muy bueno.
 
 ```{r Ajuste Binomial, echo=FALSE, warning=FALSE, message=FALSE}
 #| fig-cap: "Ajustes distribución binomial"
@@ -136,13 +148,13 @@ A continuación, en la @fig-ajustebinom, se presenta el ajuste de la distribuci�
 #| echo: false
 #| 
 m <- max(datos_agregados$N)
-fit_Binom <- fitdist(data = datos_agregados$N, dist = "binom", method = "mle", start = list(prob = 0.5, size = m+1000), lower=c(0,m-1), upper=c(1, Inf))
+fit_Binom <- fitdist(data = datos_agregados$N, dist = "binom", method = "mle", start = list(prob = 0.5, size = m+500), lower=c(0,m-1), upper=c(1, Inf))
 
-fit_ZTBinom <- fitdist(data = datos_agregados$N, dist = "ztbinom", method = "mle", start = list(prob = 0.5, size = m+200), lower=c(0,m-1), upper=c(1, Inf))
+fit_ZTBinom <- fitdist(data = datos_agregados$N, dist = "ztbinom", method = "mle", start = list(prob = 0.5, size = m+500), lower=c(0,m-1), upper=c(1, Inf))
 
-fit_ZMBinom <- fitdist(data = datos_agregados$N, dist = "zmbinom", method = "mle", start = list(prob = 0.5, size = m+200, p0=0.01), lower=c(0, m-1, 0), upper=c(1, Inf, 1))
+fit_ZMBinom <- fitdist(data = datos_agregados$N, dist = "zmbinom", method = "mle", start = list(prob = 0.5, size = m+500, p0=0.01), lower=c(0, m-1, 0), upper=c(1, Inf, 1))
 
-cdfcomp(list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="Ajustes distribución binomial", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial","Truncada","Modificada"))
+cdfcomp(cex=0.8, list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="Ajustes distribución binomial", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial","Truncada","Modificada"))
         
 # gofstat(list(fit_Binom, fit_ZTBinom, fit_ZMBinom))
 
@@ -193,52 +205,59 @@ cdfcomp(list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="Ajustes distribución b
 
 ```
 
-En la @fig-ajusteab0 se muestran todos los ajustes de las distribuciones de la clase $(a,b,0)$, lo que permite comparar y ver que la binomial negativa es la que mejor emula el comportamiento de la dsitribución empírica de los datos, estado, sin embargo, lejos de ser adecuado.
+En la @fig-ajusteab0 se muestran todos los ajustes de las distribuciones
+de la clase $(a,b,0)$, lo que permite comparar y ver que la binomial
+negativa es la que mejor emula el comportamiento de la dsitribución
+empírica de los datos, estado, sin embargo, lejos de ser adecuado.
 
 ```{r Familia (a,b,0), echo=FALSE}
 #| fig-cap: "Ajustes con distribuciones de la clase (a,b,0)"
 #| label: fig-ajusteab0
 #| echo: false
 #| 
-cdfcomp(list(fit_Poisson, fit_Geom, fit_Nbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
+cdfcomp(cex=0.8, list(fit_Poisson, fit_Geom, fit_Nbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
 ```
 
-A su vez, en la @fig-ajusteab1trunc están los miembros de la clase $(a,b,1)$ truncadas en cero, los cuáles no muestran ser mejores que sus distribuciones originales en la clase $(a,b,0)$.
+A su vez, en la @fig-ajusteab1trunc están los miembros de la clase
+$(a,b,1)$ truncadas en cero, los cuáles no muestran ser mejores que sus
+distribuciones originales en la clase $(a,b,0)$.
 
 ```{r Familia (a,b,1) truncadas , echo=FALSE}
 #| fig-cap: "Ajustes con distribuciones de la clase (a,b,1) truncadas en cero"
 #| label: fig-ajusteab1trunc
 #| echo: false
 
-cdfcomp(list(fit_ZTPoisson, fit_ZTGeom, fit_ZTNbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
+cdfcomp(cex=0.8, list(fit_ZTPoisson, fit_ZTGeom, fit_ZTNbinom, fit_ZTBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
 ```
 
-A su vez, en la @fig-ajusteab1mod están los miembros de la clase $(a,b,1)$ modificadas en cero, los cuáles tampoco son visiblemente mejores que sus distribuciones originales en la clase $(a,b,0)$.
+A su vez, en la @fig-ajusteab1mod están los miembros de la clase
+$(a,b,1)$ modificadas en cero, los cuáles tampoco son visiblemente
+mejores que sus distribuciones originales en la clase $(a,b,0)$.
 
 ```{r Familia (a,b,1) modificadas , echo=FALSE}
 #| fig-cap: "Ajustes con distribuciones de la clase (a,b,1) modificadas en cero"
 #| label: fig-ajusteab1mod
 #| echo: false
 
-cdfcomp(list(fit_ZMPoisson, fit_ZMGeom, fit_ZMNbinom, fit_ZMBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
+cdfcomp(cex=0.8, list(fit_ZMPoisson, fit_ZMGeom, fit_ZMNbinom, fit_ZMBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson","Geométrica","Binomial \nnegativa", "Binomial"))
 ```
 
 ```{r Ajuste Poisson-Gaussiana inversa, echo=FALSE, results=FALSE}
 # fit_InvGauss <- fitdist(data = datos_agregados$N, distr = "poisinvgauss", method = "mle",  start = list(mean = 50, shape = 10))
 # gofstat(fit_InvGauss, discrete = TRUE)
-# cdfcomp(fit_InvGauss)
+# cdfcomp(cex=0.8, fit_InvGauss)
 ```
 
 ```{r Ajuste Polya-Aeppli, echo=FALSE, results=FALSE}
 # library(polyaAeppli)
 # fit_PolyaAeppli <- fitdist(data = datos_agregados$N, distr = "PolyaAeppli", method = "mle",  start = list(lambda = 10, prob = 0.3), lower = c(0,0), upper = c(Inf,1))
-# cdfcomp(fit_PolyaAeppli)
+# cdfcomp(cex=0.8, fit_PolyaAeppli)
 # gofstat(fit_PolyaAeppli, discrete = TRUE)
 ```
 
 ```{r}
 #| echo: false
-#| tbl-cap: "Parámetros de los modelos ajsutados para la frecuencia"
+#| tbl-cap: "Parámetros de los modelos ajustados para la frecuencia"
 #| label: tbl-parametrosFrecuencia
 #| tbl-pos: 'h'
 
@@ -285,7 +304,7 @@ kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options 
 
 ```{r}
 #| echo: false
-#| tbl-cap: "Métricas de los modelos ajsutados para la frecuencia"
+#| tbl-cap: "Métricas de los modelos ajustados para la frecuencia"
 #| label: tbl-metricasFrecuencia
 #| tbl-pos: 'h'
 arreglo_de_metricas <- function(modelo){
@@ -313,7 +332,7 @@ kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options 
   row_spec(0,bold=TRUE)
 ```
 
-#### Ajuste de la severidad
+### Ajuste de la severidad
 
 ```{r}
 #| echo: false
@@ -351,15 +370,62 @@ goftest <- gofstat(list(fit_lnorm, fit_exp, fit_gamma,
 
 plot.legend <- c('lnorm', 'exp', 'gamma', 'JSU', 'gLogis', 'Weibull')
 denscomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
-         legendtext = plot.legend)
+         legendtext = plot.legend, cex=0.8)
 ```
 
 ```{r}
 #| echo: false
 #| fig-cap: "Función cumulativa de las distribuciones ajustadas con MLE"
 #| label: fig-cdfcompSeveridad
-cdfcomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
+cdfcomp(cex=0.8, list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
         legendtext = plot.legend)
+```
+
+En la @tbl-parametrosSeveridad se muestran los parámetros ajustados para
+cada modelo.
+
+```{r}
+#| echo: false
+#| tbl-cap: "Parámetros de los modelos ajustados para la severidad"
+#| label: tbl-parametrosSeveridad
+#| tbl-pos: 'h'
+
+arreglo_de_parametros <- function(modelo){
+par <- modelo$estimate
+resultados = ""
+
+for (i in 1:length(names(par))) {
+
+    nombre <- paste("$\\texttt{",names(par)[i], "}$")
+  if(resultados==""){
+  resultados <- paste(nombre,"=",round(as.numeric(par[i]),6) )
+  }else{
+    resultados <- paste(resultados,",", nombre ,"=",round(as.numeric(par[i]),6) )
+  }
+}
+temp <- c(modelo$distname, resultados)
+# temp <- c(modelo$distname, resultados, round(modelo$aic,6), round(modelo$bic, 6), round(valor_p, 10))
+
+return(temp)
+}
+
+
+dist_sev <- list(fit_lnorm, fit_exp, fit_gamma, 
+            fit_JSU, fit_glogis, fit_weibull)
+
+tabla <- cbind(sapply(dist_sev, arreglo_de_parametros)) %>% t() %>% as.data.frame()
+
+
+nombres_dists <- c("Lognormal", "Exponencial", "Gamma", "SU de Johnson", "Logística generalizada", "Weibull")
+
+tabla[,1] <- nombres_dists
+colnames(tabla) <- c("$\\textbf{Distribución}$", "$\\textbf{Parámetros en } \\texttt{R}$")
+
+kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options = c("striped"))%>%
+  kable_styling(full_width = F)%>%
+  kable_classic_2() %>%
+  row_spec(0,bold=TRUE)
+
 ```
 
 ```{r}
@@ -386,93 +452,99 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
   kable_classic_2() %>%
   row_spec(0,bold=TRUE)
 ```
+\newpage
 
-### 2. Fichas de resultados
+### Fichas de resultados
 
 1.  **Nombre de Resultado**: Ajuste visual de la Severidad
 
-    **Resumen en una oración**: En la @fig-denscompSeveridad y 
-    @fig-cdfcompSeveridad se observa uqe logística generalizada, Johnson SU y 
-    Weibull ajustan mejor a la severidad.
+    **Resumen en una oración**: En la @fig-denscompSeveridad y
+    @fig-cdfcompSeveridad se observa uqe logística generalizada, Johnson
+    SU y Weibull ajustan mejor a la severidad.
 
-    **Principal característica**: Ovservando la @fig-cdfcompSeveridad, estas 
-    tres distribuciones se acercan más a la función de distribución empírica. 
+    **Principal característica**: Ovservando la @fig-cdfcompSeveridad,
+    estas tres distribuciones se acercan más a la función de
+    distribución empírica.
 
-    **Problemas o posibles desafíos**: La logística generalizada y Johnson SU 
-    son distribuciones de 3 y 4 parámtetros respectivamente lo que puede 
-    afectar el principio de parsimonía. 
+    **Problemas o posibles desafíos**: La logística generalizada y
+    Johnson SU son distribuciones de 3 y 4 parámtetros respectivamente
+    lo que puede afectar el principio de parsimonía.
 
-    **Resumen en un párrafo**: En la @fig-denscompSeveridad se observa que 
-    la exponencial no presenta ningún tipo de simetría, la cual sí se aprecia 
-    en el histograma de la severidad. Por otro lado, la log-normal y la gamma 
-    no parecen coincidir en la centralidad, aparte de que presetan más peso en 
-    la cola derecha. La distirbuciones de logística generalizada, weibull y 
-    Johnson SU parecen ajustarse mejor al histograma y las tres presentan una 
-    forma similar. Al observar la @fig-cdfcompSeveridad se aprecia un 
-    comportamiento similar: la exponencial parece estar muy lejos mientras que 
-    las tres ya mencionados se acercan bastante a la distribución empírica, 
-    y la logística generalizada parece ser la que sigue más cercanamente. 
+    **Resumen en un párrafo**: En la @fig-denscompSeveridad se observa
+    que la exponencial no presenta ningún tipo de simetría, la cual sí
+    se aprecia en el histograma de la severidad. Por otro lado, la
+    log-normal y la gamma no parecen coincidir en la centralidad, aparte
+    de que presetan más peso en la cola derecha. La distirbuciones de
+    logística generalizada, weibull y Johnson SU parecen ajustarse mejor
+    al histograma y las tres presentan una forma similar. Al observar la
+    @fig-cdfcompSeveridad se aprecia un comportamiento similar: la
+    exponencial parece estar muy lejos mientras que las tres ya
+    mencionados se acercan bastante a la distribución empírica, y la
+    logística generalizada parece ser la que sigue más cercanamente.
 
 2.  **Nombre de Resultado**: Ajuste bajo la prueba de kolmogorov-Smirnov
     para la severidad.
 
-    **Resumen en una oración**: Se confirma que la Johnson SU, logística 
+    **Resumen en una oración**: Se confirma que la Johnson SU, logística
     generalizada y weibull proporcionan buen ajuste para la severidad.
 
-    **Principal característica**: Se da un no rechazo de la hipótesis nula 
-    para las distribuciones mencionadas con un nivel de significancia de 0.05.
+    **Principal característica**: Se da un no rechazo de la hipótesis
+    nula para las distribuciones mencionadas con un nivel de
+    significancia de 0.05.
 
     **Problemas o posibles desafíos**: Ninguna adicional al ya discutido
 
-    **Resumen en un párrafo**: Para una significancia de 0.05 se tiene un valor 
-    crítico de $0.1962991$, por lo que se rechaza la hipótesis de bondad de 
-    ajuste para la gamma, la exponencial y la log-normal, y se acepta para la 
-    Johnson SU, logística generalizada y weibull. Además, note que el 
-    estadístico más bajo obtenido es para la logística generalizada. Bajo una 
-    significancia de 0.01 se obtiene un valor crítico de $0.2352702$, por lo 
-    que se rechaza rotundamente la log-normal y la exponencial como 
-    distribuciones candidatas para la severidad bajo esta prueba. 
+    **Resumen en un párrafo**: Para una significancia de 0.05 se tiene
+    un valor crítico de $0.1962991$, por lo que se rechaza la hipótesis
+    de bondad de ajuste para la gamma, la exponencial y la log-normal, y
+    se no se rechaza para la Johnson SU, logística generalizada y
+    weibull. Además, note que el estadístico más bajo obtenido es para
+    la logística generalizada. Bajo una significancia de 0.01 se obtiene
+    un valor crítico de $0.2352702$, por lo que se rechaza rotundamente
+    la log-normal y la exponencial como distribuciones candidatas para
+    la severidad bajo esta prueba.
 
-    
+3.  **Nombre de Resultado**: Ajuste bajo la prueba de Anderson-Darling
+    para la severidad
 
-3.  **Nombre de Resultado**: Ajuste bajo la prueba de Anderson-Darling para
-    la severidad
-
-    **Resumen en una oración**: Se confirma que la Johnson SU, logística 
+    **Resumen en una oración**: Se confirma que la Johnson SU, logística
     generalizada y weibull proporcionan buen ajuste para la severidad.
 
-    **Principal característica**: Se da un no rechazo de la hipótesis nula 
-    para las distribuciones mencionadas con un nivel de significancia de 0.05.
+    **Principal característica**: Se da un no rechazo de la hipótesis
+    nula para las distribuciones mencionadas con un nivel de
+    significancia de 0.05.
 
     **Problemas o posibles desafíos**: Ninguna adicional al ya discutido
 
-    **Resumen en un párrafo**: Para una significancia de 0.05 se tiene un valor 
-    crítico de $2.492$, por lo que se rechaza la hipótesis de bondad de 
-    ajuste para la log-normal y exponencial, y se acepta para la Johnson SU, 
-    logística generalizada, weibull y gamma. Además, note que el 
-    estadístico más bajo obtenido es para la logística generalizada. Bajo una 
-    significancia de 0.01 se obtiene un valor crítico de $3.857$, por lo 
-    que se rechaza rotundamente la exponencial como distribuciones candidatas 
-    para la severidad bajo esta prueba.
+    **Resumen en un párrafo**: Para una significancia de 0.05 se tiene
+    un valor crítico de $2.492$, por lo que se rechaza la hipótesis de
+    bondad de ajuste para la log-normal y exponencial, y se no se
+    rechaza para la Johnson SU, logística generalizada, weibull y gamma.
+    Además, note que el estadístico más bajo obtenido es para la
+    logística generalizada. Bajo una significancia de 0.01 se obtiene un
+    valor crítico de $3.857$, por lo que se rechaza rotundamente la
+    exponencial como distribuciones candidatas para la severidad bajo
+    esta prueba.
 
 4.  **Nombre de Resultado**: AIC, BIC y versosimilitud para la severidad
 
-    **Resumen en una oración**: La logística generalizada obtiene la menor 
-    verosimilitud, AIC y BIC lo que confirma que esta es la mejor candidata
-    para la severidad.
+    **Resumen en una oración**: La logística generalizada obtiene la
+    menor verosimilitud, AIC y BIC lo que confirma que esta es la mejor
+    candidata para la severidad.
 
-    **Principal característica**: Bajo los criterios de AIC, BIC y verosimilitud
-    se confirma que las mejores candidatas son la logística generalizada, 
-    Johnson SU y Weibull
+    **Principal característica**: Bajo los criterios de AIC, BIC y
+    verosimilitud se confirma que las mejores candidatas son la
+    logística generalizada, Johnson SU y Weibull
 
     **Problemas o posibles desafíos**: Ninguna adicional al ya discutido
 
-    **Resumen en un párrafo**: Entre las distribuciones ajustadas la logística 
-    generalizada presenta el menor valor para la verosimilitud, seguido por la 
-    Johnson SU y luego la Weibull. Este mismo comportamiento se repite con el 
-    caso del BIC. También se obtiene un menor valor de AIC para la logística, 
-    seguido por la Weibull y la Johnson SU . lo cual confirma lo que ya se 
-    había observado. Esto proporciona aún más evidencia de que la logística 
+    **Resumen en un párrafo**: Entre las distribuciones ajustadas la
+    logística generalizada presenta el menor valor para la
+    verosimilitud, seguido por la Johnson SU y luego la Weibull. Este
+    mismo comportamiento se repite con el caso del BIC. También se
+    obtiene un menor valor de AIC para la logística, seguido por la
+    Weibull y la Johnson SU . lo cual confirma lo que ya se había
+    observado. Esto proporciona aún más evidencia de que la logística
     generalizada es la mejor candidata.
 
 5.  **Nombre de Resultado**: Ajuste visual de la distribuciones de clase
@@ -584,151 +656,232 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
 
     | 
 
-### 3. Tablas
+### Tablas
 
-+---------------------------------+---------------------------------+
-| Primarios                       | Secundario                      |
-+=================================+=================================+
-| -   Teoría A: Estimación        | -   Teoría D: Uso de            |
-|     paramétrica por máxima      |     distribuciones compuestas   |
-|     verosimilitud               |     para el ajuste de la        |
-|                                 |     frecuencia                  |
-| -   Teoría B: Selección de      |                                 |
-|     modelos distribucionales    | -   Hipótesis B: Distribuciones |
-|     con pruebas de bondad de    |     compuestas podrían dar un   |
-|     ajuste                      |     mejor ajuste de la          |
-|                                 |     frecuencia al ser máx       |
-| -   Teoría C: Selección de      |     flexibles (se valoran por   |
-|     modelos con el criterio de  |     ejmplo las distribuciones   |
-|     información de Akaike (AIC) |     compuestas Poisson-Poisson  |
-|     y el criterio de            |     o Neyman tipo A;            |
-|     información bayesiano (BIC) |     Poisson-Geométrica o        |
-|                                 |     Polya-Aeppli; y             |
-| -   Resultado A: Ninguna de las |     Poisson-Gaussiana inversa)  |
-|     distribuciones de las       |                                 |
-|     clases (a,b,0) o (a,b,1)    | -   Resultado B: De las         |
-|     son adecuadas para          |     distribuciones de la clase  |
-|     modelarla frecuencia de los |     (a,b,0) y (a,b,1), la       |
-|     reclamos.                   |     binomial negativa es la que |
-|                                 |     proporciona el mejor ajuste |
-| -   Hipótesis A: La             |     a los datos de frecuencia.  |
-|     distribución logística      |                                 |
-|     generalizada es la más      |                                 |
-|     adecuada para modelar la    |                                 |
-|     severidad de los reclamos.  |                                 |
-+---------------------------------+---------------------------------+
++----------------------------------+----------------------------------+
+| Primarios                        | Secundario                       |
++==================================+==================================+
+| -   Teoría A: Estimación         | -   Teoría D: Uso de             |
+|     paramétrica por máxima       |     distribuciones compuestas    |
+|     verosimilitud                |     para el ajuste de la         |
+|                                  |     frecuencia                   |
+| -   Teoría B: Selección de       |                                  |
+|     modelos distribucionales con | -   Hipótesis B: Distribuciones  |
+|     pruebas de bondad de ajuste  |     compuestas podrían dar un    |
+|                                  |     mejor ajuste de la           |
+| -   Teoría C: Selección de       |     frecuencia al ser más        |
+|     modelos con el criterio de   |     flexibles (se valoran por    |
+|     información de Akaike (AIC)  |     ejmplo las distribuciones    |
+|     y el criterio de información |     compuestas Poisson-Poisson o |
+|     bayesiano (BIC)              |     Neyman tipo A;               |
+|                                  |     Poisson-Geométrica o         |
+| -   Resultado A: Ninguna de las  |     Polya-Aeppli; y              |
+|     distribuciones de las clases |     Poisson-Gaussiana inversa)   |
+|     (a,b,0) o (a,b,1) son        |                                  |
+|     adecuadas para modelarla     | -   Resultado B: De las          |
+|     frecuencia de los reclamos.  |     distribuciones de la clase   |
+|                                  |     (a,b,0) y (a,b,1), la        |
+| -   Hipótesis A: La distribución |     binomial negativa es la que  |
+|     logística generalizada es la |     proporciona el mejor ajuste  |
+|     más adecuada para modelar la |     a los datos de frecuencia.   |
+|     severidad de los reclamos.   |                                  |
++----------------------------------+----------------------------------+
 
 : Elementos de reporte
 
-+---------------+-----------------------------------------------+
-| Sección       | Temas a tratar                                |
-+:=============:+:=============================================:+
-| Introducción  | 1.  Introducción al modelado de               |
-|               |     pérdidas.(primario)                       |
-|               | 2.  Contextualización de la problemática      |
-|               |     surgida por los daños a la propiedad y a  |
-|               |     las personas en aeropuertos de Estados    |
-|               |     Unidos.(primario)                         |
-|               | 3.  Teoría de estimación paramétrica,pruebas  |
-|               |     de bondad de ajuste y pérdidas agregadas. |
-|               |     (primario)                                |
-|               | 4.  Teoría de distribuciones compuestas para  |
-|               |     el ajuste de frecuencia.(secundario)      |
-|               | 5.  Resultados de estudios afines.            |
-|               |     (secundario)                              |
-+---------------+-----------------------------------------------+
-| Metodología   | 1.  Introducción de la base de datos y        |
-|               |     análisis descriptivo. (primario)          |
-|               |                                               |
-|               | 2.  Método A: Estimación paramétrica vía      |
-|               |     máxima verosimilitud. (primario)          |
-|               |                                               |
-|               | 3.  Método B: Uso de distribuciones           |
-|               |     compuestas para ajustar la frecuencia de  |
-|               |     reclamos.(secundarios)                    |
-|               |                                               |
-|               | 4.  Selección de modelos mediante pruebas de  |
-|               |     bondad de ajuste: Chi-Cuadrado,           |
-|               |     Kolmogorov-Smirnov y Anderson-Darling     |
-|               |     para modelos obtenidos por método A.      |
-|               |     (primario)                                |
-|               |                                               |
-|               | 5.  Selección de modelos mediante AIC y BIC.  |
-|               |     (primario).                               |
-|               |                                               |
-|               | 6.  Método de recursión (Fórmula de Panjer)   |
-|               |     para los modelos seleccionados según      |
-|               |     método B. (secundario)                    |
-+---------------+-----------------------------------------------+
-| Resultados    | 1.  Resultado A: Ninguna de las               |
-|               |     distribuciones de las clases (a,b,0) o    |
-|               |     (a,b,1) son adecuadas para modelar la     |
-|               |     frecuencia de reclamos.(primario)         |
-|               |                                               |
-|               | 2.  Resultado B: Entre las distribuciones de  |
-|               |     clases (a,b,0) y (a,b,1) la binomial      |
-|               |     negativa es la que proporciona el mejor   |
-|               |     ajuste a los datos de                     |
-|               |     frecuencia.(secundario)                   |
-|               |                                               |
-|               | 3.  Resultado C: Entre las distribuciones de  |
-|               |     severidad utilizadas para el ajuste de    |
-|               |     severidad la logística generalizadas es   |
-|               |     la más adecuada para modelar la severidad |
-|               |     de reclamos. (primario)                   |
-+---------------+-----------------------------------------------+
-|               |                                               |
-+---------------+-----------------------------------------------+
++--------------+------------------------------------------------------+
+| Sección      | Temas a tratar                                       |
++:============:+:====================================================:+
+| Introducción | 1.  Introducción al modelado de pérdidas.(primario)  |
+|              | 2.  Contextualización de la problemática surgida por |
+|              |     los daños a la propiedad y a las personas en     |
+|              |     aeropuertos de Estados Unidos.(primario)         |
+|              | 3.  Teoría de estimación paramétrica,pruebas de      |
+|              |     bondad de ajuste y pérdidas agregadas.           |
+|              |     (primario)                                       |
+|              | 4.  Teoría de distribuciones compuestas para el      |
+|              |     ajuste de frecuencia.(secundario)                |
+|              | 5.  Resultados de estudios afines. (secundario)      |
++--------------+------------------------------------------------------+
+| Metodología  | 1.  Introducción de la base de datos y análisis      |
+|              |     descriptivo. (primario)                          |
+|              |                                                      |
+|              | 2.  Método A: Estimación paramétrica vía máxima      |
+|              |     verosimilitud. (primario)                        |
+|              |                                                      |
+|              | 3.  Método B: Uso de distribuciones compuestas para  |
+|              |     ajustar la frecuencia de reclamos.(secundarios)  |
+|              |                                                      |
+|              | 4.  Selección de modelos mediante pruebas de bondad  |
+|              |     de ajuste: Chi-Cuadrado, Kolmogorov-Smirnov y    |
+|              |     Anderson-Darling para modelos obtenidos por      |
+|              |     método A. (primario)                             |
+|              |                                                      |
+|              | 5.  Selección de modelos mediante AIC y BIC.         |
+|              |     (primario).                                      |
+|              |                                                      |
+|              | 6.  Método de recursión (Fórmula de Panjer) para los |
+|              |     modelos seleccionados según método B.            |
+|              |     (secundario)                                     |
++--------------+------------------------------------------------------+
+| Resultados   | 1.  Resultado A: Ninguna de las distribuciones de    |
+|              |     las clases (a,b,0) o (a,b,1) son adecuadas para  |
+|              |     modelar la frecuencia de reclamos.(primario)     |
+|              |                                                      |
+|              | 2.  Resultado B: Entre las distribuciones de clases  |
+|              |     (a,b,0) y (a,b,1) la binomial negativa es la que |
+|              |     proporciona el mejor ajuste a los datos de       |
+|              |     frecuencia.(secundario)                          |
+|              |                                                      |
+|              | 3.  Resultado C: Entre las distribuciones de         |
+|              |     severidad utilizadas para el ajuste de severidad |
+|              |     la logística generalizadas es la más adecuada    |
+|              |     para modelar la severidad de reclamos.           |
+|              |     (primario)                                       |
++--------------+------------------------------------------------------+
+|              |                                                      |
++--------------+------------------------------------------------------+
 
 : Distribución de contenidos por sección.
 
 ## Parte de escritura
 
-En la @fig-ajusteab0 se presentan los ajustes de las distribuciones de
-la clase $(a,b,0)$ para modelar la frecuencia de los reclamos. Ninguna
-parece emular suficientemente bien la forma de la distribución empírica,
-siendo la binomial negativa la que parece hacerlo mejor. Los resultados
-para las demás distribuciones, se resumen en la
-@tbl-parametrosFrecuencia.
+En @flores se establece el procedimiento base para conseguir la
+distribución agregada al igual que algunos hallazgos y metodologías que
+son de alta utilidad. Primero la agregación de los datos se hace
+mensualmente con suma para la severidad y por frecuencia para los
+reclamos. El autor nota que hay un tendencia negativa de la frecuencia y
+severidad con respecto al tiempo por lo que procede a eliminarla. Luego,
+el autor determina la mejor distribución para cada variable utilizando
+estimación de máxima verosimilitud (MLE).
 
-En las figuras [-@fig-ajusteab1trunc] y [-@fig-ajusteab1mod] se
+Se encuentra que la binomial negativa se ajusta mejor a las frecuencias.
+No obstante, es importante señalar que este autor obtiene muy malos
+ajustes para las frecuencias de reclamos, ya que al hacer los ajustes
+respectivos obtiene valores $p$ de 0. Por lo que decide tomar la
+binomial negativa, debido a que es la que posee menor valor en el
+estadístico Chi-Cuadrado. Es por esta razón que el autor propone para el
+modelado de la frecuencia mixturas discretas, dado el mal ajuste
+obtenido.
+
+En la @fig-ajusteab0 se presentan los ajustes de las distribuciones de
+la clase $(a,b,0)$ para modelar la frecuencia de los reclamos de nuestro
+estudio. Ninguna parece emular suficientemente bien la forma de la
+distribución empírica sucediendo algo similar a lo observado en el
+estudio de @flores, siendo la binomial negativa la que parece hacerlo
+mejor. En las figuras [-@fig-ajusteab1trunc] y [-@fig-ajusteab1mod] se
 presentan los ajustes de las distribuciones de la clase $(a,b,1)$ para
 modelar la frecuencia de los reclamos. Ninguna parece emular
 suficientemente bien la forma de la distribución empírica, siendo la
 binomial negativa la que parece hacerlo mejor en ambos casos. Además, de
 las figuras [-@fig-ajustePoisson], [-@fig-ajustebinneg],
-[-@fig-ajustegeom], [-@fig-ajustebinom] se ve aprecia que las
+[-@fig-ajustegeom], [-@fig-ajustebinom] se aprecia que las
 distribuciones de la clase $(a,b,1)$ son prácticamente indiscernibles
 respecto de las distribuciones correspondientes de la clase $(a,b,0)$.
-Además, en la @tbl-parametrosFrecuencia se ve que no hay mucha
+Aunado a esto, se ve en la @tbl-parametrosFrecuencia que no hay mucha
 diferencia en los parámetros y en el caso de las distribuciones
 modificadas, la probabilidad en cero estimada por máxima verosimilitud
 se redondea precisamente a cero.
 
+@cyprian, en su estudio propone el modelado de la severidad mediante
+distribuciones continuas (Exponencial, Gamma, Pareto, Lognormal y
+Weibull) y discretas (Binomial, Geométrica, Binomial Negativa, Poisson)
+para el caso de la frecuencia, donde los parámetros se estiman vía
+máxima verosimilitud y los ajustes se miden con pruebas Chi-Cuadrado
+(para la frecuencia) , Kolmogorov-Smirnov y Anderson-Darling (para la
+severidad).
+
+Una vez obtenidos los parámetros y realizadas las pruebas de ajuste, se
+seleccionan los modelos de acuerdo a sus medidas del Criterio de
+Información de Akaike (AIC) y el Criterio de Información Bayesiano
+(BIC).
+
+En nuestro estudio, se decide seguir esta línea de razonamiento y la
+implementación de las pruebas de modelos realizadas por @cyprian.
+
+Respecto a la severidad, de la @fig-denscompSeveridad se observa que la
+distribución exponencial no presenta ningún tipo de simetría, la cual sí
+se aprecia en el histograma de la severidad. Por otro lado, la
+log-normal y la gamma no parecen coincidir en la centralidad, aparte de
+que presentan más peso en la cola derecha. La distribuciones de
+logística generalizada, Weibull y Johnson SU parecen ajustarse mejor al
+histograma y las tres presentan una forma similar. Al observar la
+@fig-cdfcompSeveridad se aprecia un comportamiento similar: la
+exponencial parece estar muy lejos mientras que las tres ya mencionados
+se acercan bastante a la distribución empírica, y la logística
+generalizada parece ser la que sigue más cercanamente.
+
 En la @tbl-metricasFrecuencia se presenta el valor $p$ resultante de la
-prueba Chi-Cuadrado de bondad de ajuste. Se obtuvieron valores $p$ muy
-bajos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los
-niveles de significancia usuales del $10\%$, $5\%$ y $1\%$, de modo que
-hay evidencia suficiente para rechazar la hipótesis de que la
-distribución de la frecuencia proviene de cualquiera de las propuestas.
-Establecido esto, en ausencia de un modelo alternativo mejor, se toman
-las distribuciones con mayores valores $p$, que son las binomiales
-negativas. Obsérvese que este inconveniente coincide con el documentado
-por @flores.
+prueba Chi-Cuadrado de bondad de ajuste en el caso de la frecuencia. Se
+obtuvieron valores $p$ muy bajos, con lo que se rechaza la hipótesis de
+bondad de ajuste bajo los niveles de significancia usuales del $10\%$,
+$5\%$ y $1\%$, de modo que hay evidencia suficiente para rechazar la
+hipótesis de que la distribución de la frecuencia proviene de cualquiera
+de las propuestas. Establecido esto, en ausencia de un modelo
+alternativo mejor, se toman las distribuciones con mayores valores $p$,
+que son las binomiales negativas. Obsérvese que este inconveniente
+coincide con el documentado por @flores.
 
-En la @tbl-metricasFrecuencia se presentan las medidas de AIC y BIC para
-cada modelo. Se ve que en general, los mejores modelos son los
-binomiales negativos, seguidos de los geométricos (que son casos
-especiales de los anteriores), Poisson y, por último, los binomiales. El
-modelo de menor AIC y BIC es el binomial negativo truncado en cero. Sin
-embargo, se observa que no hay mucha diferencia entre las medidas para
-decantarse por el binomial negativo o el binomial negativo modificado en
-cero, al punto de que hay que recurrir a la sexta cifra decimal para
-decidir.
+A su vez, en la @tbl-metricasFrecuencia se presentan las medidas de AIC
+y BIC para cada modelo de frecuencia. Se ve que, en general, los mejores
+modelos son los binomiales negativos, seguidos de los geométricos (que
+son casos especiales de los anteriores), Poisson y, por último, los
+binomiales. El modelo de menor AIC y BIC es el binomial negativo
+truncado en cero. Sin embargo, se observa que no hay mucha diferencia
+entre las medidas para decantarse por el binomial negativo o el binomial
+negativo modificado en cero, al punto de que hay que recurrir a la sexta
+cifra decimal para decidir por el primero.
 
-@flores sugiere usar distribuciones compuestas para la frecuencia,
-enfoque que se tratará de adoptar para conseguir un mejor ajuste, bajo
-la forma específica de tres modelos Poisson-Poisson o Neyman tipo A; Poisson-Geométrica o Polya-Aeppli; y Poisson-Gaussiana inversa. Además, como una idea tentativa, se encontró el uso de versiones discretas de distribuciones continuas descritas, por ejemplo, en @chakraborty2015generating y @vila2019theoretical; y además se han aplicado en seguros como se retrata en @lyu2022discrete.
+Como se mencionó, @flores sugiere usar distribuciones compuestas para la
+frecuencia, enfoque que se tratará de adoptar para conseguir un mejor
+ajuste, bajo la forma específica de tres modelos: Poisson-Poisson o
+Neyman tipo A; Poisson-Geométrica o Polya-Aeppli; y Poisson-Gaussiana
+inversa. Además, como una idea tentativa, se encontró el uso de
+versiones discretas de distribuciones continuas descritas, por ejemplo,
+en @chakraborty2015generating y @vila2019theoretical, que además se han
+aplicado en seguros, tal como se retrata en @lyu2022discrete.
 
+Por otro lado, para la severidad, según lo establece @flores, la
+Log-Laplace se ajusta mejor a los reclamos por daños a la propiedad y la
+lognormal se ajusta mejor a los reclamos por pérdidas de los bienes, por
+lo que se utilizan estas dos para modelar la severidad.
 
+En un estudio similar, @pitt2011estimation utilizan datos de costos de
+reclamos hechos a una aseguradora española por accidentes ocurridos en
+el año 2000 y recopilados en 2002, que incluye tanto los ligados a
+costos por daños a la propiedad como por costos médicos. Al igual que el
+estudio de @flores, para estimar la densidad para cada uno de los
+costos (daños a la propiedad y médicos) se utilizan métodos paramétricos
+como las aproximaciones normales y log-normales. En general, de las
+propuestas paramétricas, la log-normal
+tuvo un mejor desempeño en el estudio de @pitt2011estimation, que es
+algo que concuerda con el de @flores.
 
+Para una significancia de $0.05$, en el presente estudio se tiene un valor crítico de
+$0.1962991$ según la prueba Kolmogorov-Smirnov, por lo que se rechaza la
+hipótesis de bondad de ajuste para la gamma, la exponencial y la
+log-normal, y no se rechaza para la Johnson SU, logística generalizada y
+Weibull. Además, note que el estadístico más bajo obtenido es para la
+logística generalizada. Bajo una significancia de $0.01$ se obtiene un
+valor crítico de $0.2352702$, por lo que se rechaza rotundamente la
+log-normal y la exponencial como distribución candidata para la
+severidad bajo esta prueba.
+
+En cuanto a la prueba de Anderson-Darling, con una significancia de
+$0.05$ se tiene un valor crítico de $2.492$, por lo que se rechaza la
+hipótesis de bondad de ajuste para la log-normal y exponencial, y no se
+rechaza para la Johnson SU, logística generalizada, Weibull y gamma.
+Además, note que el estadístico más bajo obtenido es para la logística
+generalizada. Bajo una significancia de $0.01$ se obtiene un valor
+crítico de $3.857$, por lo que se rechaza rotundamente la exponencial
+como distribuciones candidatas para la severidad bajo esta prueba.
+
+Entre las distribuciones ajustadas, la logística generalizada presenta
+el menor valor para la verosimilitud, seguido por la Johnson SU y luego
+la Weibull. Este mismo comportamiento se repite con el caso del BIC.
+También se obtiene un menor valor de AIC para la logística, seguido por
+la Weibull y la Johnson SU, lo cual confirma lo que ya se había
+observado. Esto proporciona aún más evidencia de que la logística
+generalizada es la mejor candidata.
+
+## Parte de reflexión 
