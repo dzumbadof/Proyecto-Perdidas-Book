@@ -369,20 +369,29 @@ goftest <- gofstat(list(fit_lnorm, fit_exp, fit_gamma,
 #| label: fig-denscompSeveridad
 
 plot.legend <- c('lnorm', 'exp', 'gamma', 'JSU', 'gLogis', 'Weibull')
-denscomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
+denscomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull),
+         main = "", ylab = 'Función de densidad', xlab = 'Datos de severidad',
          legendtext = plot.legend, cex=0.8)
 ```
+
+La @fig-denscompSeveridad muestra que la logística generalizada, weibull y 
+Johnson SU muestran la forma que acerca más al histograma. Las otras distribuciones
+no se aproximan tan bien a los datos. 
 
 ```{r}
 #| echo: false
 #| fig-cap: "Función cumulativa de las distribuciones ajustadas con MLE"
 #| label: fig-cdfcompSeveridad
-cdfcomp(cex=0.8, list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull), 
-        legendtext = plot.legend)
+cdfcomp(cex=0.8, list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, 
+                      fit_weibull), main = "", xlab = 'Datos de severidad',
+        ylab = 'Función de distribución', legendtext = plot.legend)
 ```
 
-En la @tbl-parametrosSeveridad se muestran los parámetros ajustados para
-cada modelo.
+La @fig-cdfcompSeveridad se muestra la distribución cumulativa, la cual muestra 
+más claramente que las distribuciones mencionadas anteriormentes se ajustan 
+mejor. En la @tbl-parametrosSeveridad se muestran los parámetros ajustados para
+cada modelo. Se observa que los modelos más adecuados, al menos visualmente, son 
+más complejos al tener tres y cuatro parámetros
 
 ```{r}
 #| echo: false
@@ -885,3 +894,13 @@ observado. Esto proporciona aún más evidencia de que la logística
 generalizada es la mejor candidata.
 
 ## Parte de reflexión 
+
+Luego de hacer la implementación del modelo escogido queda delimitado completamente 
+el alcance del proyecto: Las distribuciones candidatas escogidas, las pruebas 
+de bondad de ajuste: AIC, BIC, Kolmogorov-Smirnov, Anderson-Darling y 
+Chi-cuadrado. Se encuentran resultados muy alentadores para la severidad y se 
+logra ajustar parcialmente la frecuencia. Con esto se logra responder 
+parcialmente la pregunta de investigación. A la UVE se le agrega las conclusiones
+obtenidas y se adjunta a continuación
+
+![Actualización de de la UVE Heurística 3](Images/UVE Maik 3.png){#fig-UVE2 fig-align="center" width="600"}
