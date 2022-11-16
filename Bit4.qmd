@@ -1,4 +1,156 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
 # Bitácora 4
 
-Aquí se hace la bitácora 4
+
+```{r echo=FALSE, message=FALSE, warning=TRUE}
+#| output: false
+#| warning: false
+
+library(readxl)
+library(kableExtra)
+library(readr)
+library(dplyr)
+library(janitor) # función clean_names()
+library(magrittr) # función %<>%
+library(stringr) # función str_replace
+library(lubridate)
+library(PerformanceAnalytics) # funciones skewness y kurtosis
+library(ggplot2)
+library(actuar)
+library(fitdistrplus)
+library(stats)
+library(cowplot) # mejorar el aspecto de los gráficos
+library(gamlss) #distribucion Johnson SU
+library(glogis) #distribucion logistica generalizada
+```
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: false
+#| warning: false
+
+datos <- read_excel("claims-2010-2013.xlsx") %>%
+
+clean_names() # se limpian nombres columnas
+
+datos <- datos %>% mutate(date_received = ymd(date_received),
+
+close_amount = as.numeric(gsub("\\$", "", close_amount)))
+
+# Se fija la base de datos
+
+attach(datos)
+```
+
+```{r, message=FALSE, warning=FALSE}
+#| echo: false
+
+# X: Severidad
+
+# N: Frecuencia
+
+# Se filtran los reclamos aprobados o en los que se llegó a un acuerdo
+
+datos_agregados <- datos %>% 
+  filter(disposition == "Settle" | disposition== "Approve in Full")
+
+datos_agregados <- datos_agregados %>% 
+  group_by("ano" = year(date_received), "mes" = month(date_received) ) %>% 
+  summarise(X = sum(close_amount), N = n()) %>%
+  ungroup() %>% mutate(t = c(1:48), .before = X)
+
+```
+
+## Parte de planificación
+
+### Variciones en el ajuste de la frecuencia
+
+```{r Ajuste Poisson-Gaussiana inversa, echo=FALSE, results=FALSE}
+fit_InvGauss <- fitdist(data = datos_agregados$N, distr = "poisinvgauss", method = "mle",  start = list(mean = 50, shape = 10))
+gofstat(fit_InvGauss, discrete = TRUE)
+cdfcomp(cex=0.8, fit_InvGauss)
+```
+
+```{r Ajuste Polya-Aeppli, echo=FALSE, results=FALSE}
+library(polyaAeppli) # Composición Poisson-Geométrica
+fit_PolyaAeppli <- fitdist(data = datos_agregados$N, distr = "PolyaAeppli", method = "mle",  start = list(lambda = 10, prob = 0.3), lower = c(0,0), upper = c(Inf,1))
+cdfcomp(cex=0.8, fit_PolyaAeppli)
+gofstat(fit_PolyaAeppli, discrete = TRUE)
+```
+
+```{r Ajuste Weibull discreta, echo=FALSE, results=FALSE}
+library(extraDistr)
+fit_WeibullDiscreta <- fitdist(data = datos_agregados$N, distr = "dweibull", method = "mle",  start = list(shape1 = 0.2, shape2 = 1), lower = c(0,0), upper = c(1,Inf))
+
+cdfcomp(cex=0.8, fit_WeibullDiscreta)
+gofstat(fit_WeibullDiscreta, discrete = TRUE)
+
+```
+```{r Ajuste Gamma discreta, echo=FALSE, results=FALSE}
+library(extraDistr)
+
+fit_GammaDiscreta <- fitdist(data = datos_agregados$N, distr = "dgamma", method = "mle",  start = list(shape=100, scale=32), lower = c(0,0), upper = c(Inf,Inf))
+
+cdfcomp(fit_GammaDiscreta)
+
+gofstat(fit_GammaDiscreta, discrete = TRUE)
+```
+
+```{r Delaporte 1, echo=FALSE, results=FALSE}
+# library(Delaporte)
+# library(fitdistrplus)
+# fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "delap", method = "mle",  start = list(alpha = 3, beta = 4, lambda = 10), lower = c(0,0,0), upper = c(Inf,Inf,Inf))
+# 
+# cdfcomp(fit_Delaporte)
+# 
+# gofstat(fit_Delaporte, discrete = TRUE)
+```
+
+
+```{r Delaporte 2, echo=FALSE, results=FALSE}
+library(gamlss.dist)
+fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "DEL", method = "mle",  start = list(mu = 265, sigma = 75, nu = 0.6), lower = c(0,0,0), upper = c(Inf,Inf,1))
+
+cdfcomp(fit_Delaporte)
+ 
+gofstat(fit_Delaporte, discrete = TRUE)
+```
+
+
+```{r Weibull inversa discreta, echo=FALSE, results=FALSE}
+# library(DiscreteInverseWeibull)
+# fit_WeibullInvDiscreta <- fitdist(data = datos_agregados$N, distr = "diweibull", method = "mle", start = list(q=2.806039e-70, beta=9.828215e-01 ), lower = c(0,0), upper = c(1,Inf))
+# 
+# mgedist(data = datos_agregados$N, distr = "diweibull", start = list(q=0.9, beta=0.54), lower = c(0,0), upper = c(1,Inf))
+# 
+# cdfcomp(fit_WeibullInvDiscreta)
+#  
+# gofstat(fit_Delaporte, discrete = TRUE)
+```
+
+
+```{r Poisson-Tweedie, echo=FALSE, results=FALSE}
+# library(poistweedie)
+# 
+# dpoistweedie(y = 1, p = exp(10), mu = 200, lambda = 10, theta0 = -10, log = F)
+# 
+# fit_PoissonTweedie <- 
+#   fitdist(data = datos_agregados$N, distr = "poistweedie",
+#           method = "mle", start = list(p = exp(10), mu = 200, lambda = 10, theta0 = -10), lower=c(1,0,0,-Inf), upper=c(Inf, Inf, Inf, 0), control = list(trace=1, maxit = 10000))
+# 
+# p <- fit_PoissonTweedie$estimate[1]
+# mu <- fit_PoissonTweedie$estimate[2]
+# lambda <- fit_PoissonTweedie$estimate[3]
+# theta0 <- fit_PoissonTweedie$estimate[4]
+# x <- sort(datos_agregados$N)
+# y <- ppoistweedie(q = x, p = p, mu = mu, lambda = lambda, theta0 = theta0 , log = FALSE, lower.tail = TRUE)
+# 
+# 
+# plot(y~x)
+# lines(ecdf(x))
+```
 
