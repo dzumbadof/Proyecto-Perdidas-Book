@@ -27,6 +27,10 @@ library(stats)
 library(cowplot) # mejorar el aspecto de los gráficos
 library(gamlss) #distribucion Johnson SU
 library(glogis) #distribucion logistica generalizada
+
+#Valores Extremos
+library(extRemes)
+library(evd)
 ```
 
 ```{r, warning=FALSE, message=FALSE}
@@ -153,4 +157,59 @@ gofstat(fit_Delaporte, discrete = TRUE)
 # plot(y~x)
 # lines(ecdf(x))
 ```
+
+
+### Ajuste del máximo
+
+```{r}
+#| echo: false  
+#| warning: false
+datos_maximo <- datos %>% 
+  filter(disposition == "Settle" | disposition== "Approve in Full")
+
+datos_maximo <- datos_maximo %>% 
+  group_by("ano" = year(date_received),"mes" = month(date_received) ) %>% 
+  summarise(max = max(close_amount))
+
+ext <- datos_maximo$max
+```
+
+
+```{r}
+#| echo: false
+GEV <- fevd(ext, type='GEV')
+GEV_summary <- summary(GEV, silent=TRUE)
+plot(GEV)
+```
+
+```{r}
+#| echo: false
+Gumbel <- fevd(ext, type='Gumbel')
+Gumbel_summary <- summary(Gumbel, silent=TRUE)
+plot(Gumbel)
+```
+```{r}
+#| echo: false
+#| warning: false
+Weibull <- fitdist(ext, distr = 'weibull')
+plot(Weibull)
+```
+
+AIC 
+
+```{r}
+#| echo: false
+GEV_summary$AIC
+Gumbel_summary$AIC
+Weibull$aic
+```
+BIC
+
+```{r}
+#| echo: false
+GEV_summary$BIC
+Gumbel_summary$BIC
+Weibull$bic
+```
+
 
