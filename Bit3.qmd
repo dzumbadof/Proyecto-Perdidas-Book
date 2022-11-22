@@ -332,6 +332,8 @@ kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options 
   row_spec(0,bold=TRUE)
 ```
 
+
+
 ### Ajuste de la severidad
 
 ```{r}

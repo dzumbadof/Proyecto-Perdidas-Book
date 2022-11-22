@@ -114,6 +114,46 @@ gofstat(fit_GammaDiscreta, discrete = TRUE)
 # gofstat(fit_Delaporte, discrete = TRUE)
 ```
 
+```{r Mezcla de distribuciones Poisson}
+library(extraDistr)
+
+dmixpois2 <- function(x, lambda1, lambda2, lambda3, lambda4, alpha1, alpha2, alpha3, alpha4){
+  
+  dmixpois(x, lambda=c(lambda1, lambda2, lambda3, lambda4), alpha = c(alpha1, alpha2, alpha3, alpha4))
+  
+}
+
+pmixpois2 <- function(q, lambda1, lambda2, lambda3, lambda4, alpha1, alpha2, alpha3, alpha4){
+  
+  pmixpois(q, lambda=c(lambda1, lambda2, lambda3, lambda4), alpha = c(alpha1, alpha2, alpha3, alpha4))
+  
+}
+
+a <- cut(sort(datos_agregados$N), breaks = 4)
+
+pesos <- prop.table(table(a)) %>% as.numeric()
+# dmixpois(12, lambda = c(25,30), alpha = c(1/3,2/3))
+
+# fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=80, lambda2=50, lambda3=100, lambda4=50), fix.arg = list(alpha1=0.05, alpha2=0.05, alpha3=0.7, alpha4=0.2))
+
+fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=80, lambda2=50, lambda3=100, lambda4=50), fix.arg = list(alpha1=0.05, alpha2=0.05, alpha3=0.7, alpha4=0.2))
+
+# , lower=list(c(0,0)), upper=list(c(Inf, Inf))
+
+cdfcomp(fit_MezclaPoisson)
+
+denscomp(fit_MezclaPoisson)
+gofstat(fit_MezclaPoisson, discrete = TRUE)
+
+n <- sort(datos_agregados$N)
+y <- dmixpois(n, lambda = fit_MezclaPoisson$estimate, alpha = c(0.05, 0.05, 0.7, 0.2))
+plot(y~n, type="line")
+ks.test(datos_agregados$N, y)
+
+
+fit_MezclaPoisson$estimate
+
+```
 
 ```{r Delaporte 2, echo=FALSE, results=FALSE}
 library(gamlss.dist)
@@ -121,15 +161,16 @@ fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "DEL", method = "mle"
 
 cdfcomp(fit_Delaporte)
  
-gofstat(fit_Delaporte, discrete = TRUE)
+hgofstat(fit_Delaporte, discrete = TRUE)
 ```
 
 
 ```{r Weibull inversa discreta, echo=FALSE, results=FALSE}
 # library(DiscreteInverseWeibull)
+
 # fit_WeibullInvDiscreta <- fitdist(data = datos_agregados$N, distr = "diweibull", method = "mle", start = list(q=2.806039e-70, beta=9.828215e-01 ), lower = c(0,0), upper = c(1,Inf))
-# 
-# mgedist(data = datos_agregados$N, distr = "diweibull", start = list(q=0.9, beta=0.54), lower = c(0,0), upper = c(1,Inf))
+
+# mledist(data = datos_agregados$N, distr = "diweibull", start = list(q=0.9, beta=0.54), lower = c(0,0), upper = c(1,Inf))
 # 
 # cdfcomp(fit_WeibullInvDiscreta)
 #  
