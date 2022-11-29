@@ -6,6 +6,10 @@ editor:
 
 # Bitácora 4
 
+```{r echo=FALSE}
+options(scipen = 999)
+
+```
 
 ```{r echo=FALSE, message=FALSE, warning=TRUE}
 #| output: false
@@ -102,6 +106,7 @@ fit_GammaDiscreta <- fitdist(data = datos_agregados$N, distr = "dgamma", method 
 cdfcomp(fit_GammaDiscreta)
 
 gofstat(fit_GammaDiscreta, discrete = TRUE)
+
 ```
 
 ```{r Delaporte 1, echo=FALSE, results=FALSE}
@@ -112,6 +117,67 @@ gofstat(fit_GammaDiscreta, discrete = TRUE)
 # cdfcomp(fit_Delaporte)
 # 
 # gofstat(fit_Delaporte, discrete = TRUE)
+```
+
+
+```{r Mezcla de distribuciones Poisson 2}
+datosN <-sort(datos_agregados$N)
+wpar <- n2w(c(80,200,100),c(0.5,1.25,0.75)/3)
+# wpar <- n2w(c(90,100,90,50),c(0.5,1.5,1.5,0.5)/4) # valor p 10%
+# wpar <- n2w(c(90,100,90,55),c(0.5,1.5,1.5,0.5)/4) # valor p 17.51% con 4 P
+# wpar <- n2w(c(80,90,100, 100,90,80),c(0.05,0.2,0.3,0.3,0.1,0.05))# valor p 0.88 con 6 P bic 565.5083
+
+# wpar <- n2w(c(80,90,100,90,80),c(0.1,0.35,0.1,0.35,0.1))# valor p 0.175128  
+ 
+# wpar <- n2w(c(90,100,90,55),c(0.5,1.2,1.5,0.8)/4) 
+# wpar <- n2w(c(200,200,400,300,200),c(0.5,1,2,1,0.5)/5)
+
+
+mllk <- function(wpar,x){ zzz <- w2n(wpar)
+        -sum(log(outer(x,zzz$lambda,dpois)%*%zzz$delta)) }
+n2w  <- function(lambda,delta)log(c(lambda,delta[-1]/(1-sum(delta[-1]))))
+w2n  <- function(wpar){m <- (length(wpar)+1)/2
+        lambda <- exp(wpar[1:m])
+        delta  <- exp(c(0,wpar[(m+1):(2*m-1)]))
+return(list(lambda=lambda,delta=delta/sum(delta))) }
+
+datosN <-sort(datos_agregados$N)
+
+
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+
+(lambda <- resultados$lambda)
+
+(alpha <- resultados$delta)
+
+
+n <- length(datos_agregados$N)
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fake <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=48, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+#class(fake)
+
+
+```
+
+```{r}
+gofstat(fake)
+cdfcomp(fake, fitcol = "blue")
+```
+
+```{r}
+n <- length(datos_agregados$N)
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+(bic <- -2*loglik+k*log(n) )
+
 ```
 
 ```{r Mezcla de distribuciones Poisson}
@@ -136,7 +202,7 @@ pesos <- prop.table(table(a)) %>% as.numeric()
 
 # fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=80, lambda2=50, lambda3=100, lambda4=50), fix.arg = list(alpha1=0.05, alpha2=0.05, alpha3=0.7, alpha4=0.2))
 
-fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=80, lambda2=50, lambda3=100, lambda4=50), fix.arg = list(alpha1=0.05, alpha2=0.05, alpha3=0.7, alpha4=0.2))
+fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=10, lambda2= 47.47441, lambda3=69.25002, lambda4=283.31817), fix.arg = list(alpha1= 1.100846e-07 , alpha2=5.740846e-12, alpha3=8.333333e-02, alpha4=9.166666e-01))
 
 # , lower=list(c(0,0)), upper=list(c(Inf, Inf))
 
@@ -152,7 +218,29 @@ ks.test(datos_agregados$N, y)
 
 
 fit_MezclaPoisson$estimate
+fit_MezclaPoisson$method
+fit_MezclaPoisson$sd
+fit_MezclaPoisson$cor
+fit_MezclaPoisson$vcov
+fit_MezclaPoisson$loglik
+fit_MezclaPoisson$aic
+fit_MezclaPoisson$bic
+fit_MezclaPoisson$n
+fit_MezclaPoisson$data
+fit_MezclaPoisson$fix.arg
 
+fit_MezclaPoisson$distname
+
+
+fake <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=-382.8774, aic=0, bic=0, n=48, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois" ,  class = "fitdist")                  )
+                  
+fit_GammaDiscreta$dots  
+fit_MezclaPoisson$dots
+fit_MezclaPoisson$convergence
+fit_MezclaPoisson$discrete
+fit_MezclaPoisson$weights
 ```
 
 ```{r Delaporte 2, echo=FALSE, results=FALSE}
