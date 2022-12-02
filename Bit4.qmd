@@ -119,30 +119,41 @@ gofstat(fit_GammaDiscreta, discrete = TRUE)
 # gofstat(fit_Delaporte, discrete = TRUE)
 ```
 
-
-```{r Mezcla de distribuciones Poisson 2}
-datosN <-sort(datos_agregados$N)
-wpar <- n2w(c(80,200,100),c(0.5,1.25,0.75)/3)
-# wpar <- n2w(c(90,100,90,50),c(0.5,1.5,1.5,0.5)/4) # valor p 10%
-# wpar <- n2w(c(90,100,90,55),c(0.5,1.5,1.5,0.5)/4) # valor p 17.51% con 4 P
-# wpar <- n2w(c(80,90,100, 100,90,80),c(0.05,0.2,0.3,0.3,0.1,0.05))# valor p 0.88 con 6 P bic 565.5083
-
-# wpar <- n2w(c(80,90,100,90,80),c(0.1,0.35,0.1,0.35,0.1))# valor p 0.175128  
- 
-# wpar <- n2w(c(90,100,90,55),c(0.5,1.2,1.5,0.8)/4) 
-# wpar <- n2w(c(200,200,400,300,200),c(0.5,1,2,1,0.5)/5)
+```{r Funciones MLE mezcla Poisson}
 
 
 mllk <- function(wpar,x){ zzz <- w2n(wpar)
         -sum(log(outer(x,zzz$lambda,dpois)%*%zzz$delta)) }
+
 n2w  <- function(lambda,delta)log(c(lambda,delta[-1]/(1-sum(delta[-1]))))
 w2n  <- function(wpar){m <- (length(wpar)+1)/2
         lambda <- exp(wpar[1:m])
         delta  <- exp(c(0,wpar[(m+1):(2*m-1)]))
 return(list(lambda=lambda,delta=delta/sum(delta))) }
 
+
+```
+
+
+```{r Mezcla de distribuciones Poisson 2}
 datosN <-sort(datos_agregados$N)
 
+# wpar <- n2w(c(400,400,400),c(0.75,1.25,0.75)/3)
+# wpar <- n2w(c(100,200,300),c(1,1,1)/3)
+
+# wpar <- n2w(c(300,300),c(0.5, 0.5))
+
+# wpar <- n2w(c(90,100,90,55),c(0.5,1.5,1.5,0.5)/4) # valor p 17.51% con 4 P
+# wpar <- n2w(c(90,100,90,55),c(0.1,0.4,0.3,0.1)) # valor p 17%
+
+#   |wpar <- n2w(c(80,90,100,100,90,80),c(0.05,0.2,0.3,0.3,0.1,0.05))# 6 P
+
+# wpar <- n2w(c(80,90,100,90,80),c(0.1,0.35,0.1,0.35,0.1))# valor p 0.175128  
+ 
+# wpar <- n2w(c(90,100,90,55),c(0.5,1.2,1.5,0.8)/4) # 7%
+# wpar <- n2w(c(200,200,400,300,200),c(0.5,1,2,1,0.5)/5)
+
+datosN <-sort(datos_agregados$N)
 
 resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
 
@@ -162,14 +173,25 @@ fake <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
                        method="mle", sd=NA, cor=NA, vcov=NA,
                        loglik=0, aic=aic, bic=bic, n=48, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
 
-#class(fake)
+class(fake)
+gofstat(fake)
+
+cdfcomp(fake, fitcol = "blue")
+
+
+hist(datos_agregados$N, probability = T)
+lines(density(datos_agregados$N))
 
 
 ```
 
 ```{r}
 gofstat(fake)
+
 cdfcomp(fake, fitcol = "blue")
+
+
+
 ```
 
 ```{r}
@@ -249,7 +271,7 @@ fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "DEL", method = "mle"
 
 cdfcomp(fit_Delaporte)
  
-hgofstat(fit_Delaporte, discrete = TRUE)
+gofstat(fit_Delaporte, discrete = TRUE)
 ```
 
 
