@@ -6,8 +6,9 @@ editor:
 
 # Bitácora 4
 
-```{r echo=FALSE}
-options(scipen = 999)
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+options(scipen = 99, digits = 4)
 
 ```
 
@@ -77,47 +78,95 @@ datos_agregados <- datos_agregados %>%
 
 ### Variciones en el ajuste de la frecuencia
 
+En la bitácora anterior se comentó que se valoraba probar con distribuciones compuestas para mejorar el ajuste de la frecuencia, buscando con estas una mayor flexibilidad. En ese sentido se probó con las composiciones Poisson-Gaussiana inversa, Poisson-Geométrica (Distribución Polya-Aeppli) y Binomial negativa-Poisson (Delaporte). 
+
 ```{r Ajuste Poisson-Gaussiana inversa, echo=FALSE, results=FALSE}
 fit_InvGauss <- fitdist(data = datos_agregados$N, distr = "poisinvgauss", method = "mle",  start = list(mean = 50, shape = 10))
-gofstat(fit_InvGauss, discrete = TRUE)
-cdfcomp(cex=0.8, fit_InvGauss)
+# gofstat(fit_InvGauss, discrete = TRUE)
+# cdfcomp(cex=0.8, fit_InvGauss)
 ```
 
 ```{r Ajuste Polya-Aeppli, echo=FALSE, results=FALSE}
 library(polyaAeppli) # Composición Poisson-Geométrica
 fit_PolyaAeppli <- fitdist(data = datos_agregados$N, distr = "PolyaAeppli", method = "mle",  start = list(lambda = 10, prob = 0.3), lower = c(0,0), upper = c(Inf,1))
-cdfcomp(cex=0.8, fit_PolyaAeppli)
-gofstat(fit_PolyaAeppli, discrete = TRUE)
+# cdfcomp(cex=0.8, fit_PolyaAeppli)
+# gofstat(fit_PolyaAeppli, discrete = TRUE)
 ```
+
+```{r Delaporte, echo=FALSE, results=FALSE}
+library(gamlss.dist)
+fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "DEL", method = "mle",  start = list(mu = 265, sigma = 75, nu = 0.6), lower = c(0,0,0), upper = c(Inf,Inf,1))
+
+# cdfcomp(fit_Delaporte)
+#  
+# gofstat(fit_Delaporte, discrete = TRUE)
+
+```
+
+En la @fig-ajusteComp se presenta la comparación de las funciones de distribución ajustadas en comparación con la distribución empírica. Se puede observar que el ajuste no es adecuado.
+
+```{r, echo=FALSE}
+#| fig-cap: "Ajustes de la frecuencia con distribuciones compuestas"
+#| label: fig-ajusteComp
+#| echo: false
+cdfcomp(cex=0.8, list(fit_InvGauss, fit_PolyaAeppli, fit_Delaporte), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Poisson-Gaussiana inversa", "Polya-Aeppli", "Delaporte"), fitlty = 1)
+```
+Además, se halló que versiones discretas de distribuciones continuas podrían ser usadas para la modelización de la frecuencia. En este análisis nos centramos en las variaciones disponibles en el paquete \texttt{extraDistr} de \texttt{R}: la distribución Weibull discreta y la Gamma discreta. En este contexto, la discretización corresponde a que es la distribución de la parte entera de una variable aleatoria absolutamente continua. La comparación de las distribuciones teóricas ajustadas y la empírica se muestra en la figura @fig-ajusteVersionesDiscretas y se nota que estos ajustes son los mejores hasta el momento.
 
 ```{r Ajuste Weibull discreta, echo=FALSE, results=FALSE}
 library(extraDistr)
-fit_WeibullDiscreta <- fitdist(data = datos_agregados$N, distr = "dweibull", method = "mle",  start = list(shape1 = 0.2, shape2 = 1), lower = c(0,0), upper = c(1,Inf))
+fit_WeibullDiscreta <- fitdist(data = datos_agregados$N, distr = "dweibull", method = "mle",  start = list(shape1 = 0.8, shape2 = 1), lower = c(0,0), upper = c(1,Inf))
 
-cdfcomp(cex=0.8, fit_WeibullDiscreta)
-gofstat(fit_WeibullDiscreta, discrete = TRUE)
-
+# cdfcomp(cex=0.8, fit_WeibullDiscreta)
+# gofstat(fit_WeibullDiscreta, discrete = TRUE)
 ```
+
 ```{r Ajuste Gamma discreta, echo=FALSE, results=FALSE}
 library(extraDistr)
 
 fit_GammaDiscreta <- fitdist(data = datos_agregados$N, distr = "dgamma", method = "mle",  start = list(shape=100, scale=32), lower = c(0,0), upper = c(Inf,Inf))
 
-cdfcomp(fit_GammaDiscreta)
-
-gofstat(fit_GammaDiscreta, discrete = TRUE)
+# cdfcomp(fit_GammaDiscreta)
+# 
+# gofstat(fit_GammaDiscreta, discrete = TRUE)
 
 ```
 
-```{r Delaporte 1, echo=FALSE, results=FALSE}
-# library(Delaporte)
-# library(fitdistrplus)
-# fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "delap", method = "mle",  start = list(alpha = 3, beta = 4, lambda = 10), lower = c(0,0,0), upper = c(Inf,Inf,Inf))
-# 
-# cdfcomp(fit_Delaporte)
-# 
-# gofstat(fit_Delaporte, discrete = TRUE)
+```{r, echo=FALSE}
+#| fig-cap: "Ajustes de la frecuencia con distribuciones compuestas"
+#| label: fig-ajusteVersionesDiscretas
+#| echo: false
+cdfcomp(cex=0.8, list(fit_WeibullDiscreta, fit_GammaDiscreta), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Weibull discreta", "Gamma discreta"), fitlty = 1)
 ```
+
+Revisando el histograma en la @fig-histograma_frecuencia surge la idea de probar con mezclas de distribuciones discretas, ya que parece haber una porción hacia el inicio un poco desligada del resto.
+
+```{r, echo=FALSE}
+#| fig-cap: "Histograma de frecuencia de los reclamos por mes"
+#| label: fig-histograma_frecuencia
+#| echo: false
+g <- ggplot(datos_agregados, aes(x=N)) 
+g <- g + geom_histogram(colour="black", fill="#40A195", bins=16)
+g <- g + scale_y_continuous(breaks = seq(0,22,2))
+g <- g + scale_x_continuous(breaks = seq(5000,125000, 15000))
+g <- g + labs(x = "Frecuencia mensual de los reclamos",
+              y = "Cantidad",
+              caption = "Fuente: Elaboración propia con datos de TSA")
+
+g <- g + theme_cowplot()
+
+g
+
+```
+
+Los ajustes con mezclas se limitaron a combinaciones de dos, tres, cuatro y seis distribuciones de tipo Poisson. Debe señalarse un punto muy importante respecto a estas mezclas: requieren estimar muchos parámetros. Para explicar esta aseveración, téngase en cuenta que si $p(x;\lambda_{j})$ denota la función masa de probabilidad de una distribución tipo Poisson con parámetro $\lambda_{j}$, una mezcla de $d$ distribuciones tipo Poisson tiene función masa
+\[
+p(x;\lambda_{1},\dots, \lambda_{d}, \alpha_{1},\dots, \alpha_{d})=\sum_{j=1}^{d}
+\alpha_{j}\,p(x;\lambda_{j})
+\]
+para algunos pesos $\alpha_{j}$ que cumplen con ser positivos y sumar la unidad. De este último hecho, se desprende que solamente es necesario estimar $d-1$ pesos, además de los $d$ parámetros $\lambda_{j}$, sumando un total de $2d-1$ parámetros a estimar. Es decir, que con mezclas de dos, tres, cuatro y seis distribuciones tipo Poisson, deben estimarse tres, cinco, siete y once parámetros respectivamente. Como se mencionó en bitácoras anteriores, los datos de frecuencia que se busca ajustar son un total de 48, de modo que estos resultados deben tratarse con reserva, principalmente en los dos últimos casos.
+
+En las Figuras [-@fig-ajusteMezclasPoisson23] y [-@fig-ajusteMezclasPoisson46]  se presentan estos ajustes. Visualmente, el ajuste en la @fig-ajusteMezclasPoisson23 sin duda mejora respecto a cualquier propuesta anterior y  el de la @fig-ajusteMezclasPoisson46 es muy bueno. Sin embargo, sobre todo este último ajuste debe manejarse con mucho cuidado ya que se considera que ambos modelos exhiben sobreajuste. 
 
 ```{r Funciones MLE mezcla Poisson}
 
@@ -134,181 +183,182 @@ return(list(lambda=lambda,delta=delta/sum(delta))) }
 
 ```
 
-
-```{r Mezcla de distribuciones Poisson 2}
-datosN <-sort(datos_agregados$N)
-
-# wpar <- n2w(c(400,400,400),c(0.75,1.25,0.75)/3)
-# wpar <- n2w(c(100,200,300),c(1,1,1)/3)
-
-# wpar <- n2w(c(300,300),c(0.5, 0.5))
-
-# wpar <- n2w(c(90,100,90,55),c(0.5,1.5,1.5,0.5)/4) # valor p 17.51% con 4 P
-# wpar <- n2w(c(90,100,90,55),c(0.1,0.4,0.3,0.1)) # valor p 17%
-
-#   |wpar <- n2w(c(80,90,100,100,90,80),c(0.05,0.2,0.3,0.3,0.1,0.05))# 6 P
-
-# wpar <- n2w(c(80,90,100,90,80),c(0.1,0.35,0.1,0.35,0.1))# valor p 0.175128  
- 
-# wpar <- n2w(c(90,100,90,55),c(0.5,1.2,1.5,0.8)/4) # 7%
-# wpar <- n2w(c(200,200,400,300,200),c(0.5,1,2,1,0.5)/5)
-
-datosN <-sort(datos_agregados$N)
-
+```{r Mezcla 2 Poisson, echo=FALSE}
+wpar <- n2w(c(300,300),c(0.01, 0.99))
+datosN <- datos_agregados$N
 resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
 
+lambda <- resultados$lambda
 
-(lambda <- resultados$lambda)
+alpha <- resultados$delta
 
-(alpha <- resultados$delta)
-
+lambdaMezclaPoisson2<- lambda
+alphaMezclaPoisson2 <- alpha
 
 n <- length(datos_agregados$N)
+
 loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
 k <- length(lambda) + length(alpha)-1
 bic <- -2*loglik+k*log(n) 
 aic <- -2*loglik+k*2 
 
-fake <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+fitMezclaPoisson2 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
                        method="mle", sd=NA, cor=NA, vcov=NA,
-                       loglik=0, aic=aic, bic=bic, n=48, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
-
-class(fake)
-gofstat(fake)
-
-cdfcomp(fake, fitcol = "blue")
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
 
 
-hist(datos_agregados$N, probability = T)
-lines(density(datos_agregados$N))
-
+gofMezclaPoisson2 <- gofstat(fitMezclaPoisson2)
+gofMezclaPoisson2$chisqpvalue <- pchisq(gofMezclaPoisson2$chisq, df = length(gofMezclaPoisson2$chisqbreaks)+ 1 - 1 -length(alphaMezclaPoisson2)- length(lambdaMezclaPoisson2) + 1, lower.tail = FALSE)
 
 ```
 
-```{r}
-gofstat(fake)
+```{r Mezcla 3 Poisson, echo=FALSE}
 
-cdfcomp(fake, fitcol = "blue")
+wpar <- n2w(c(100,200,300),c(1,1,1)/3)
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
 
+lambda <- resultados$lambda
 
+alpha <- resultados$delta
 
-```
+lambdaMezclaPoisson3 <- lambda
 
-```{r}
+alphaMezclaPoisson3 <- alpha
+
 n <- length(datos_agregados$N)
+
 loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
 k <- length(lambda) + length(alpha)-1
-(bic <- -2*loglik+k*log(n) )
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
 
-```
-
-```{r Mezcla de distribuciones Poisson}
-library(extraDistr)
-
-dmixpois2 <- function(x, lambda1, lambda2, lambda3, lambda4, alpha1, alpha2, alpha3, alpha4){
-  
-  dmixpois(x, lambda=c(lambda1, lambda2, lambda3, lambda4), alpha = c(alpha1, alpha2, alpha3, alpha4))
-  
-}
-
-pmixpois2 <- function(q, lambda1, lambda2, lambda3, lambda4, alpha1, alpha2, alpha3, alpha4){
-  
-  pmixpois(q, lambda=c(lambda1, lambda2, lambda3, lambda4), alpha = c(alpha1, alpha2, alpha3, alpha4))
-  
-}
-
-a <- cut(sort(datos_agregados$N), breaks = 4)
-
-pesos <- prop.table(table(a)) %>% as.numeric()
-# dmixpois(12, lambda = c(25,30), alpha = c(1/3,2/3))
-
-# fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=80, lambda2=50, lambda3=100, lambda4=50), fix.arg = list(alpha1=0.05, alpha2=0.05, alpha3=0.7, alpha4=0.2))
-
-fit_MezclaPoisson <- fitdist(data = datos_agregados$N, distr = "mixpois2", method = "mle", start = list(lambda1=10, lambda2= 47.47441, lambda3=69.25002, lambda4=283.31817), fix.arg = list(alpha1= 1.100846e-07 , alpha2=5.740846e-12, alpha3=8.333333e-02, alpha4=9.166666e-01))
-
-# , lower=list(c(0,0)), upper=list(c(Inf, Inf))
-
-cdfcomp(fit_MezclaPoisson)
-
-denscomp(fit_MezclaPoisson)
-gofstat(fit_MezclaPoisson, discrete = TRUE)
-
-n <- sort(datos_agregados$N)
-y <- dmixpois(n, lambda = fit_MezclaPoisson$estimate, alpha = c(0.05, 0.05, 0.7, 0.2))
-plot(y~n, type="line")
-ks.test(datos_agregados$N, y)
-
-
-fit_MezclaPoisson$estimate
-fit_MezclaPoisson$method
-fit_MezclaPoisson$sd
-fit_MezclaPoisson$cor
-fit_MezclaPoisson$vcov
-fit_MezclaPoisson$loglik
-fit_MezclaPoisson$aic
-fit_MezclaPoisson$bic
-fit_MezclaPoisson$n
-fit_MezclaPoisson$data
-fit_MezclaPoisson$fix.arg
-
-fit_MezclaPoisson$distname
-
-
-fake <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+fitMezclaPoisson3 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
                        method="mle", sd=NA, cor=NA, vcov=NA,
-                       loglik=-382.8774, aic=0, bic=0, n=48, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois" ,  class = "fitdist")                  )
-                  
-fit_GammaDiscreta$dots  
-fit_MezclaPoisson$dots
-fit_MezclaPoisson$convergence
-fit_MezclaPoisson$discrete
-fit_MezclaPoisson$weights
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+
+gofMezclaPoisson3 <- gofstat(fitMezclaPoisson3)
+gofMezclaPoisson3$chisqpvalue <- pchisq(gofMezclaPoisson3$chisq, df = length(gofMezclaPoisson3$chisqbreaks)+ 1 - 1 -length(alphaMezclaPoisson3)- length(lambdaMezclaPoisson3) + 1, lower.tail = FALSE)
+
 ```
 
-```{r Delaporte 2, echo=FALSE, results=FALSE}
-library(gamlss.dist)
-fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "DEL", method = "mle",  start = list(mu = 265, sigma = 75, nu = 0.6), lower = c(0,0,0), upper = c(Inf,Inf,1))
+```{r Mezcla 4 Poisson, echo=FALSE}
+wpar <- n2w(c(90,100,90,55),c(0.1,0.4,0.3,0.1)) 
 
-cdfcomp(fit_Delaporte)
- 
-gofstat(fit_Delaporte, discrete = TRUE)
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+lambda <- resultados$lambda
+
+alpha <- resultados$delta
+
+lambdaMezclaPoisson4 <- lambda
+
+alphaMezclaPoisson4 <- alpha
+
+n <- length(datos_agregados$N)
+
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fitMezclaPoisson4 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+
+```
+
+```{r Mezcla 6 Poisson, echo=FALSE}
+wpar <- n2w(c(80,90,100,100,90,80),c(0.05,0.2,0.3,0.3,0.1,0.05))# 6 P
+
+
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+lambda <- resultados$lambda
+
+alpha <- resultados$delta
+
+lambdaMezclaPoisson6 <- lambda
+
+alphaMezclaPoisson6 <- alpha
+
+n <- length(datos_agregados$N)
+
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fitMezclaPoisson6 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
 ```
 
 
-```{r Weibull inversa discreta, echo=FALSE, results=FALSE}
-# library(DiscreteInverseWeibull)
 
-# fit_WeibullInvDiscreta <- fitdist(data = datos_agregados$N, distr = "diweibull", method = "mle", start = list(q=2.806039e-70, beta=9.828215e-01 ), lower = c(0,0), upper = c(1,Inf))
+```{r}
+#| fig-cap: "Ajustes de la frecuencia con mezclas de dos y tres distribuciones tipo Poisson"
+#| label: fig-ajusteMezclasPoisson23
+#| echo: false
 
-# mledist(data = datos_agregados$N, distr = "diweibull", start = list(q=0.9, beta=0.54), lower = c(0,0), upper = c(1,Inf))
-# 
-# cdfcomp(fit_WeibullInvDiscreta)
-#  
-# gofstat(fit_Delaporte, discrete = TRUE)
+cdfcomp(cex=0.8, list(fitMezclaPoisson2, fitMezclaPoisson3), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Mezcla 2 Poisson", "Mezcla 3 Poisson"),fitcol = c("blue", "red"), fitlty = 1 )
 ```
 
+```{r}
+#| fig-cap: "Ajustes de la frecuencia con mezclas de cuatro y seis distribuciones tipo Poisson"
+#| label: fig-ajusteMezclasPoisson46
+#| echo: false
+cdfcomp(cex=0.8, list(fitMezclaPoisson4, fitMezclaPoisson6), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c( "Mezcla 4 Poisson", "Mezcla 6 Poisson"), datacol = c("black"), fitcol = c("blue", "red"), fitlty = 1 )
 
-```{r Poisson-Tweedie, echo=FALSE, results=FALSE}
-# library(poistweedie)
-# 
-# dpoistweedie(y = 1, p = exp(10), mu = 200, lambda = 10, theta0 = -10, log = F)
-# 
-# fit_PoissonTweedie <- 
-#   fitdist(data = datos_agregados$N, distr = "poistweedie",
-#           method = "mle", start = list(p = exp(10), mu = 200, lambda = 10, theta0 = -10), lower=c(1,0,0,-Inf), upper=c(Inf, Inf, Inf, 0), control = list(trace=1, maxit = 10000))
-# 
-# p <- fit_PoissonTweedie$estimate[1]
-# mu <- fit_PoissonTweedie$estimate[2]
-# lambda <- fit_PoissonTweedie$estimate[3]
-# theta0 <- fit_PoissonTweedie$estimate[4]
-# x <- sort(datos_agregados$N)
-# y <- ppoistweedie(q = x, p = p, mu = mu, lambda = lambda, theta0 = theta0 , log = FALSE, lower.tail = TRUE)
-# 
-# 
-# plot(y~x)
-# lines(ecdf(x))
+
 ```
 
+```{r}
+#| echo: false
+#| tbl-cap: "Métricas de los modelos nuevos ajustados para la frecuencia"
+#| label: tbl-metricasNuevasFrecuencia
+#| tbl-pos: 'h'
+
+
+dist_frec2 <- list(fit_InvGauss, fit_PolyaAeppli, fit_Delaporte,
+fit_WeibullDiscreta, fit_GammaDiscreta, fitMezclaPoisson2, fitMezclaPoisson3,
+fitMezclaPoisson4, fitMezclaPoisson6)
+
+
+arreglo_de_metricas <- function(modelo){
+par <- modelo$estimate
+resultados = ""
+pruebas <- gofstat(modelo, discrete = TRUE)
+valor_p <- pruebas$chisqpvalue
+
+temp <- c(modelo$distname, round(modelo$aic,2), round(modelo$bic, 2), round(valor_p, 6))
+
+return(temp)
+}
+
+tabla <- cbind(sapply(dist_frec2, arreglo_de_metricas)) %>% t() %>% as.data.frame() 
+
+nombres_dists <- c("Poisson-Gaussiana inversa", "Polya-Aeppli", "Delaporte",
+"Weibull discreta", "Gamma discreta", "Mezcla 2 Poisson", "Mezcla 3 Poisson", "Mezcla 4 Poisson", "Mezcla 6 Poisson")
+
+tabla[,1] <- nombres_dists
+
+colnames(tabla) <- c("Distribución", "AIC", "BIC", "Valor $p$")
+
+tabla$`Valor $p$`[6] <- round(gofMezclaPoisson2$chisqpvalue, 6)
+tabla$`Valor $p$`[7] <- round(gofMezclaPoisson3$chisqpvalue, 6)
+tabla$`Valor $p$`[8] <- ""
+tabla$`Valor $p$`[9] <- ""
+
+
+kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options = c("striped"))%>%
+  kable_styling(full_width = F)%>%
+  kable_classic_2() %>%
+  row_spec(0,bold=TRUE)
+
+```
 
 ### Ajuste del máximo
 
@@ -339,6 +389,7 @@ Gumbel <- fevd(ext, type='Gumbel')
 Gumbel_summary <- summary(Gumbel, silent=TRUE)
 plot(Gumbel)
 ```
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -362,5 +413,8 @@ GEV_summary$BIC
 Gumbel_summary$BIC
 Weibull$bic
 ```
+
+
+## Parte de escritura
 
 

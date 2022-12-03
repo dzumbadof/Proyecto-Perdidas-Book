@@ -162,7 +162,7 @@ g <- g + geom_histogram(colour="black", fill="#40A195", bins=7)
 g <- g + scale_y_continuous(breaks = seq(0,22,2))
 g <- g + scale_x_continuous(breaks = seq(5000,125000, 15000))
 g <- g + labs(x = "Monto pagado",
-              y = "Frecuencia",
+              y = "Cantidad",
               caption = "Fuente: Elaboración propia con datos de TSA")
 
 g <- g + theme_cowplot()

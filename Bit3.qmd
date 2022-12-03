@@ -154,6 +154,11 @@ fit_ZTBinom <- fitdist(data = datos_agregados$N, dist = "ztbinom", method = "mle
 
 fit_ZMBinom <- fitdist(data = datos_agregados$N, dist = "zmbinom", method = "mle", start = list(prob = 0.5, size = m+500, p0=0.01), lower=c(0, m-1, 0), upper=c(1, Inf, 1))
 
+fit_Binom$estimate[2] <- round(fit_Binom$estimate[2])
+fit_ZMBinom$estimate[2] <- round(fit_ZMBinom$estimate[2])
+fit_ZTBinom$estimate[2] <- round(fit_ZTBinom$estimate[2])
+
+
 cdfcomp(cex=0.8, list(fit_Binom, fit_ZTBinom, fit_ZMBinom), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c("Binomial","Truncada","Modificada"))
         
 # gofstat(list(fit_Binom, fit_ZTBinom, fit_ZMBinom))
