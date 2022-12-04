@@ -315,12 +315,10 @@ cdfcomp(cex=0.8, list(fitMezclaPoisson4, fitMezclaPoisson6), main="", xlab="Dato
 
 ```
 
-```{r}
-#| echo: false
-#| tbl-cap: "Métricas de los modelos nuevos ajustados para la frecuencia"
-#| label: tbl-metricasNuevasFrecuencia
-#| tbl-pos: 'h'
 
+
+
+```{r, echo=FALSE}
 
 dist_frec2 <- list(fit_InvGauss, fit_PolyaAeppli, fit_Delaporte,
 fit_WeibullDiscreta, fit_GammaDiscreta, fitMezclaPoisson2, fitMezclaPoisson3,
@@ -353,10 +351,23 @@ tabla$`Valor $p$`[8] <- ""
 tabla$`Valor $p$`[9] <- ""
 
 
+
+```
+
+
+Por último, en la @tbl-MetricasNuevas se presentan los valores $p$ de la prueba chi-cuadrado y las medidas de AIC y  BIC para los modelos nuevos ajustados para la frecuencia.
+
+
+```{r}
+#| tbl-cap: "Métricas de los modelos nuevos ajustados para la frecuencia"
+#| label: tbl-MetricasNuevas
+#| echo: false
+
 kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options = c("striped"))%>%
   kable_styling(full_width = F)%>%
   kable_classic_2() %>%
   row_spec(0,bold=TRUE)
+
 
 ```
 
@@ -570,6 +581,130 @@ Gumbel_summary$BIC
 Weibull$bic
 ```
 
+
+## Nuevas fichas de resultados
+
+9.  **Nombre de Resultado**: Uso de distribuciones compuestas para
+    ajustar la frecuencia
+
+    **Resumen en una oración**: Se probó con las composiciones
+    Poisson-Gaussiana inversa, Poisson-Geométrica (Distribución
+    Polya-Aeppli) y Binomial negativa-Poisson (Delaporte) y con ninguna
+    se obtienen resultados satisfactorios.
+
+    **Principal característica**: De estas tres distribuciones, la
+    Polya-Aeppli mereció un mayor valor $p$ en la prueba chi-cuadrado,
+    sin llegar a ser este significativo, y mejores valores de AIC y BIC.
+
+    **Problemas o posibles desafíos**: La flexibilidad que se perseguía
+    al incorporar distribuciones más complejas no se refleja en un buen
+    ajuste, de modo que deben explorarse otras alternativas.
+
+    **Resumen en un párrafo**: En la @fig-ajusteComp se presenta el
+    ajuste emprendido con las composiciones Poisson-Gaussiana inversa,
+    Poisson-Geométrica (Distribución Polya-Aeppli) y Binomial
+    negativa-Poisson (Delaporte) con los datos de frecuencia. Aunque
+    mejores que algunos ajustes con distribuciones de las familias
+    $(a,b,0)$ o $(a,b,1)$, no se puede considerar el ajuste final puesto
+    que está lejos de ser satisfactorio. En resumen, la flexibilidad que
+    se perseguía al incorporar distribuciones más complejas no se
+    refleja en un buen ajuste, de modo que deben explorarse otras
+    alternativas. Cabe mencionar que de las tres distribuciones, la
+    Polya-Aeppli mereció un mayor valor $p$ en la prueba chi-cuadrado,
+    sin llegar a ser este significativo, y mejores valores de AIC y BIC,
+    lo que se puede verificar en la @tbl-MetricasNuevas.
+
+10. **Nombre de Resultado**: Uso de versiones discretas de
+    distribuciones continuas para ajustar la frecuencia
+
+    **Resumen en una oración**: Se probó con las versiones discretas de
+    la distribuciones Weibull y gamma.
+
+    **Principal característica**: La Weibull discreta presenta un mejor
+    ajuste que cualquier otra distribución empleada, como se puede             anticipar de la @fig-ajusteVersionesDiscretas y comprobar de la            @tbl-MetricasNuevas.
+
+    **Problemas o posibles desafíos**: Se advierten dos problemas: el
+    valor p en la prueba chi-cuadrado sigue siendo bajísimo y, además,
+    el parámetro $q$ de esta distribución, que cumple $0<q<1$ según se
+    presentó por primera vez en @nakagawa1975discrete, es muy cercano a
+    $1$ (hasta el décimo decimal hay una diferencia de aproximadamente
+    $0.0000000002$) y se implementó en el paquete \texttt{extraDistr}
+    [@wolodzko2019extradistr], de modo que, en la práctica, no
+    resultaría útil porque no se puede evaluar en la distribución.
+
+    **Resumen en un párrafo**: Se buscó ajustar los datos de frecuencia
+    con las versiones discretas de la distribuciones Weibull y gamma. De
+    estas dos, la distribución Weibull discreta presenta un mejor
+    ajuste, además, respecto de cualquier otra distribución empleada
+    anteriormente, como se puede anticipar de la
+    @fig-ajusteVersionesDiscretas y comprobar de la
+    @tbl-MetricasNuevas. No obstante, se advierten dos claros
+    problemas: el valor p en la prueba chi-cuadrado sigue siendo
+    bajísimo y, además, el parámetro $q$ de esta distribución, que
+    cumple $0<q<1$ según se presentó por primera vez en
+    @nakagawa1975discrete, es muy cercano a $1$ (hasta el décimo decimal
+    hay una diferencia de aproximadamente $0.0000000002$) y se
+    implementó en el paquete \texttt{extraDistr}
+    [@wolodzko2019extradistr], de modo que, en la práctica, no
+    resultaría útil porque no se puede evaluar en la distribución.
+
+11. **Nombre de Resultado**: Uso de mezclas Poisson para ajustar la
+    frecuencia
+
+    **Resumen en una oración**: Se probó con mezclas de dos, tres,
+    cuatro y seis distribuciones Poisson.
+
+    **Principal característica**: Visualmente, los ajustes mejoran
+    mucho, como se muestra en las Figuras [-@fig-ajusteMezclasPoisson23] y
+    [-@fig-ajusteMezclasPoisson46]. Se evidencia un ajuste cada vez
+    mejor conforme se aumenta la cantidad de distribuciones mezcladas.
+
+    **Problemas o posibles desafíos**: Las mezclas tienen un nivel de
+    complejidad creciente porque cada vez se requiere estimar una mayor
+    cantidad de parámetros, para lo cual no se tiene una gran cantidad
+    de datos (solo 48). Este hecho imposibilita una adecuada utilización
+    de la prueba chi-cuadrado, ya que, con los datos de frecuencia, una
+    cantidad que oscila entre los siete y ocho intervalos se requieren
+    para garantizar que las frecuencias esperadas en cada intervalo sean
+    iguales o superiores a cinco, lo cual constituye una regla empírica
+    para el correcto funcionamiento de esta prueba estadística. De esta
+    manera, con mezclas de cuatro y seis distribuciones, se tienen que
+    estimar siete y once parámetros respectivamente, con lo cual, en la
+    prueba chi-cuadrado de bondad de ajuste se tendrían grados de
+    libertad negativos. Por esta razón, no se muestran en la
+    @tbl-MetricasNuevas los valores $p$ para estos modelos en
+    la prueba mencionada. En resumen, no se puede cuantificar la
+    evidencia a favor de la bondad de ajuste de estos dos modelos más
+    complejos con la prueba planteada y solamente se aprecia esta de
+    forma gráfica.
+
+    **Resumen en un párrafo**: Se probó con mezclas de dos, tres,
+    cuatro y seis distribuciones Poisson para mejorar el ajuste de la frecuencia. Visualmente, los ajustes mejoran
+    mucho, como se muestra en las Figuras [-@fig-ajusteMezclasPoisson23] y
+    [-@fig-ajusteMezclasPoisson46]. Se evidencia un ajuste cada vez
+    mejor conforme se aumenta la cantidad de distribuciones mezcladas.Las           mezclas tienen un nivel de
+    complejidad creciente porque cada vez se requiere estimar una mayor
+    cantidad de parámetros, para lo cual no se tiene una gran cantidad
+    de datos (solo 48). Este hecho imposibilita una adecuada utilización
+    de la prueba chi-cuadrado, ya que, con los datos de frecuencia de este          trabajo, una
+    cantidad que oscila entre los siete y ocho intervalos se requieren
+    para garantizar que las frecuencias esperadas en cada intervalo sean
+    iguales o superiores a cinco, lo cual constituye una regla empírica
+    para el correcto funcionamiento de esta prueba estadística. De esta
+    manera, con mezclas de cuatro y seis distribuciones, se tienen que
+    estimar siete y once parámetros respectivamente, con lo cual, en la
+    prueba chi-cuadrado de bondad de ajuste se tendrían grados de
+    libertad negativos. Por esta razón, no se muestran en la
+    @tbl-MetricasNuevas los valores $p$ para estos modelos en
+    la prueba mencionada. En resumen, no se puede cuantificar la
+    evidencia a favor de la bondad de ajuste de estos dos modelos más
+    complejos con la prueba planteada y solamente se aprecia esta de
+    forma gráfica. Además, se prevee que se está cayendo es sobreajuste.
+    
+
+    
+    
+    
 
 ## Parte de escritura
 
