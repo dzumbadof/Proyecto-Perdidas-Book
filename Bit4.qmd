@@ -719,7 +719,7 @@ Para efectos de facilidad de revisión de los distintos apartados solicitados en
 
 **¿Cuál es el contexto de su tema?**
 
-El TSA (\emph{Transportation Security Administration}) es una agencia establecida luego del 2001 que se ocupa del chequeo de los pasajeros y su equipaje en los aeropuertos de Estados Unidos.
+El TSA (*Transportation Security Administration*) es una agencia establecida luego del 2001 que se ocupa del chequeo de los pasajeros y su equipaje en los aeropuertos de Estados Unidos.
 
 **¿Por qué es oportuno?**
 
