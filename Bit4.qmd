@@ -355,12 +355,12 @@ tabla$`Valor $p$`[9] <- ""
 ```
 
 
-Por último, en la @tbl-MetricasNuevas se presentan los valores $p$ de la prueba chi-cuadrado y las medidas de AIC y  BIC para los modelos nuevos ajustados para la frecuencia.
+Por último, en la @tbl-MetricasNuevasBit4 Bit4 se presentan los valores $p$ de la prueba chi-cuadrado y las medidas de AIC y  BIC para los modelos nuevos ajustados para la frecuencia.
 
 
 ```{r}
 #| tbl-cap: "Métricas de los modelos nuevos ajustados para la frecuencia"
-#| label: tbl-MetricasNuevas
+#| label: tbl-MetricasNuevasBit4
 #| echo: false
 
 kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options = c("striped"))%>%
@@ -426,7 +426,7 @@ cdfcomp(cex=0.8, list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis,
 ```{r}
 #| echo: false
 #| tbl-cap: "Métricas de bondad de ajuste de la severidad"
-#| label: tbl-metricasSeveridad
+#| label: tbl-metricasSeveridad2
 #| tbl-pos: 'h'
 
 LogLik <- c(fit_lnorm$loglik, fit_exp$loglik, fit_gamma$loglik, 
@@ -612,7 +612,7 @@ Weibull$bic
     alternativas. Cabe mencionar que de las tres distribuciones, la
     Polya-Aeppli mereció un mayor valor $p$ en la prueba chi-cuadrado,
     sin llegar a ser este significativo, y mejores valores de AIC y BIC,
-    lo que se puede verificar en la @tbl-MetricasNuevas.
+    lo que se puede verificar en la @tbl-MetricasNuevasBit4 .
 
 10. **Nombre de Resultado**: Uso de versiones discretas de
     distribuciones continuas para ajustar la frecuencia
@@ -621,7 +621,7 @@ Weibull$bic
     la distribuciones Weibull y gamma.
 
     **Principal característica**: La Weibull discreta presenta un mejor
-    ajuste que cualquier otra distribución empleada, como se puede             anticipar de la @fig-ajusteVersionesDiscretas y comprobar de la            @tbl-MetricasNuevas.
+    ajuste que cualquier otra distribución empleada, como se puede             anticipar de la @fig-ajusteVersionesDiscretas y comprobar de la            @tbl-MetricasNuevasBit4 .
 
     **Problemas o posibles desafíos**: Se advierten dos problemas: el
     valor p en la prueba chi-cuadrado sigue siendo bajísimo y, además,
@@ -638,7 +638,7 @@ Weibull$bic
     ajuste, además, respecto de cualquier otra distribución empleada
     anteriormente, como se puede anticipar de la
     @fig-ajusteVersionesDiscretas y comprobar de la
-    @tbl-MetricasNuevas. No obstante, se advierten dos claros
+    @tbl-MetricasNuevasBit4 . No obstante, se advierten dos claros
     problemas: el valor p en la prueba chi-cuadrado sigue siendo
     bajísimo y, además, el parámetro $q$ de esta distribución, que
     cumple $0<q<1$ según se presentó por primera vez en
@@ -672,7 +672,7 @@ Weibull$bic
     estimar siete y once parámetros respectivamente, con lo cual, en la
     prueba chi-cuadrado de bondad de ajuste se tendrían grados de
     libertad negativos. Por esta razón, no se muestran en la
-    @tbl-MetricasNuevas los valores $p$ para estos modelos en
+    @tbl-MetricasNuevasBit4  los valores $p$ para estos modelos en
     la prueba mencionada. En resumen, no se puede cuantificar la
     evidencia a favor de la bondad de ajuste de estos dos modelos más
     complejos con la prueba planteada y solamente se aprecia esta de
@@ -695,7 +695,7 @@ Weibull$bic
     estimar siete y once parámetros respectivamente, con lo cual, en la
     prueba chi-cuadrado de bondad de ajuste se tendrían grados de
     libertad negativos. Por esta razón, no se muestran en la
-    @tbl-MetricasNuevas los valores $p$ para estos modelos en
+    @tbl-MetricasNuevasBit4  los valores $p$ para estos modelos en
     la prueba mencionada. En resumen, no se puede cuantificar la
     evidencia a favor de la bondad de ajuste de estos dos modelos más
     complejos con la prueba planteada y solamente se aprecia esta de
