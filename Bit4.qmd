@@ -752,6 +752,7 @@ Dada la problemática en el ajuste de la frecuencia, en este estudio se propone 
 En este trabajo, se busca modelar las pérdidas ligadas a los daños a la propiedad y a las personas en aeropuertos de Estados Unidos para el período 2010-2013, a partir de la frecuencia y severidad de estos.
 
 **¿Cuál es su enfoque? ¿Cómo pretende descubrirlo?**
+
 Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad mediante distribuciones continuas, como de las frecuencias mediante distribuciones discretas tradicionales y adicionalmente mediante los métodos alternativos antes mencionados.Por último,  la implementación de métodos de selección de modelos.
 
 **Resumen: ¿Qué se trata en cada sección?**
