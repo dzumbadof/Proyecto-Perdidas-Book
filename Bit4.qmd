@@ -582,6 +582,11 @@ Weibull$bic
 ```
 
 
+
+
+
+
+
 ## Nuevas fichas de resultados
 
 9.  **Nombre de Resultado**: Uso de distribuciones compuestas para
@@ -707,5 +712,53 @@ Weibull$bic
     
 
 ## Parte de escritura
+
+###  Reestructuración de la introducción 
+
+Para efectos de facilidad de revisión de los distintos apartados solicitados en la bitacora 4 para la reestructuración de la introducción, se procede a presentar esta de forma seccionada por pregunta.Para efectos del proyecto final se va presentar la introducción en un solo texto, omitiendo las respectivas preguntas.  
+
+**¿Cuál es el contexto de su tema?**
+
+El TSA (\emph{Transportation Security Administration}) es una agencia establecida luego del 2001 que se ocupa del chequeo de los pasajeros y su equipaje en los aeropuertos de Estados Unidos.
+
+**¿Por qué es oportuno?**
+
+Como consecuencia de sus labores, es común que se causen daños y extravíos de las pertenencias de los pasajeros lo que resulta en reclamos por parte de los mismos en la forma de compensación monetaria por los daños ocasionados. 
+
+**¿En qué se va a centrar específicamente en este tema?**
+
+En este estudio nos centraremos específicamente en cuantificar las pérdidas de la agencia TSA ligadas a los reclamos antes mencionados.
+
+**¿Qué lugar, tiempo y datos demográficos va a analizar?**  
+
+Para esto, se va hacer uso de los datos del Departamento de Seguridad Nacional de Estados Unidos contemplando el periodo de tiempo comprendido entre el  2010 y 2013. 
+
+**¿Cuál es la relevancia de esto en su campo académico?** 
+
+La cuantificación de las pérdidas, es de vital importancia en cualquier empresa o institución con la finalidad de poseer las reservas o capital necesario para afrontar dichas pérdidas.
+
+**¿Hay una relevancia política o social más amplia?**
+
+Dada la gran frecuencia en los reclamos en aeropuertos por los daños a la propiedad y a las personas la cuantificación de  estos mediante el modelado de pérdidas agregados ha sido un tema que ha despertado el interés de diversos investigadores entre ellos @flores y @chen2020aggregate .
+
+ @flores propone crear modelar las perdidas agregadas utilizando la base de datos que se utilizara en nuestro estudio.No obstante, si bien es cierto este autor logra ajustar de forma significativa la severidad no logra ajustar de forma adecuada la frecuencia de los reclamos.
+
+**¿Qué nuevos conocimientos aportará, ¿Ayuda a resolver o salvar un problema teórico, aborda una laguna en la literatura, se basa en la investigación existente o propone una nueva teoría sobre su tema?**
+
+Dada la problemática en el ajuste de la frecuencia, en este estudio se propone implementar métodos para el ajuste de esta como el uso de distribuciones compuestas, uso de versiones discretas de distribuciones continuas para ajustar la frecuencia y uso de mezclas Poisson, con la finalidad de lograr un mejor ajuste de la frecuencia de los reclamos.
+
+**¿Cuál es el objetivo de su pregunta de investigación? ¿Qué quiere descubrir?**
+
+En este trabajo, se busca modelar las pérdidas ligadas a los daños a la propiedad y a las personas en aeropuertos de Estados Unidos para el período 2010-2013, a partir de la frecuencia y severidad de estos.
+
+**¿Cuál es su enfoque? ¿Cómo pretende descubrirlo?**
+Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad mediante distribuciones continuas, como de las frecuencias mediante distribuciones discretas tradicionales y adicionalmente mediante los métodos alternativos antes mencionados.Por último,  la implementación de métodos de selección de modelos.
+
+**Resumen: ¿Qué se trata en cada sección?**
+
+El esquema del documento es el siguiente. En la sección Metodología, se describe con mayor detalle los datos utilizados y los métodos implementados para este proyecto. En la sección Resultados, se realiza un análisis de los resultados obtenidos tanto del ajuste de la frecuencia, la severidad, métodos de selección de modelos y modelo de pérdidas agregadas.En la sección  Conclusiones se presentan las conclusiones obtenidas mediante este estudio y las sugerencias para trabajos futuros.
+
+
+
 
 
