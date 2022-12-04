@@ -564,6 +564,16 @@ Weibull <- fitdist(ext, distr = 'weibull')
 plot(Weibull)
 ```
 
+```{r}
+fit_frechet <- fitdist(
+  ext,
+  distr='frechet',
+  lower=c(0,0,0), 
+  start=list(loc=2528, scale=1079, shape=0.47)
+)
+```
+
+
 AIC 
 
 ```{r}
