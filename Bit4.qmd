@@ -377,7 +377,7 @@ kable(tabla, format = "latex", escape = FALSE)  %>% kable_styling(latex_options 
 #| echo: false
 #| warning: false
 
-X <- datos_agregados$mean_sev/100
+X <- datos_agregados$mean_sev
 
 fit_lnorm <- fitdist(data = X, distr = "lnorm", method = "mle")
 
@@ -447,8 +447,9 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
   kable_classic_2() %>%
   row_spec(0,bold=TRUE)
 ```
+Para la prueba de Kolmogorov Smirnov, una significancia del 5% corresponde a un valor crítico de 0.196299, lo que excluye la exponencial, pero todas las demás son candidatas viables. Para la prueba de Anderson-Darling una significancia del 5% corresponde a un valor crítico de 2.492 lo que nuevamente rechaza la exponencial rotundamente pero deja todas las demás distribuciones como viables. Al observar el AIC y BIC vemos que la gamma proporciona el mejor ajuste con la log-normal muy cercana también. Bajo estas medidas y el principio de parsimonía se decide elegir la gamma como la distribución de la severidad. 
 
-Simulación de la S
+### Simulación de la S
 
 ```{r}
 p3 <- rmixpois(
@@ -474,31 +475,52 @@ p6 <- rmixpois(
   lambda = fitMezclaPoisson4$estimate$lambda,
   alpha = fitMezclaPoisson4$estimate$alpha
 )
-
-location = as.numeric(fit_glogis$estimate[1])
-scale = as.numeric(fit_glogis$estimate[2])
-shape = as.numeric(fit_glogis$estimate[3])
+shape=as.numeric(fit_gamma$estimate[1])
+rate=as.numeric(fit_gamma$estimate[2])
 
 S3 = rep(NA,1000); S4 = rep(NA,1000); S5 = rep(NA,1000); S6 = rep(NA,1000)
 for(i in 1:1000){
-  S3[i] <- 100*sum(rglogis(p3[i],location,scale,shape))
-  S4[i] <- 100*sum(rglogis(p4[i],location,scale,shape))
-  S5[i] <- 100*sum(rglogis(p5[i],location,scale,shape))
-  S6[i] <- 100*sum(rglogis(p6[i],location,scale,shape))
+  S3[i] <- sum(rgamma(p3[i],shape,rate))
+  S4[i] <- sum(rgamma(p4[i],shape,rate))
+  S5[i] <- sum(rgamma(p5[i],shape,rate))
+  S6[i] <- sum(rgamma(p6[i],shape,rate))
 }
 ```
 
 ```{r}
+#| echo: false
+#| fig-cap-location: top
+#| fig-cap: Distribución de las pérdidas simuladas utilizando mixturas de Poisson
+#| fig-subcap: 
+#|   - "3 Poissones"
+#|   - "4 Poissones"
+#|   - "5 Poissones"
+#|   - "6 Poissones"
 #| layout-ncol: 2
-hist(datos_agregados$X)
-hist(S3)
-hist(S4)
-hist(S5)
-hist(S6)
+#| label: fig-DistS
+
+df <- data.frame(S3, S4, S5, S6)
+ggplot(df, aes(x=S3)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+ggplot(df, aes(x=S4)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+ggplot(df, aes(x=S5)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+ggplot(df, aes(x=S6)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
 ```
+
 ### VaR 
 
 ```{r}
+#| echo: false
+#| tbl-cap: Comparación del VaR al 95% con diferentes mixturas de la Poisson
+#| label: tbl-VaR
+#| tbl-colwidths: [0.5,0.5,0.5,0.5,0.5]
 var95Real <- quantile(datos_agregados$X,0.95)
 var95P3 <- quantile(S3,0.95)
 var95P4 <- quantile(S4,0.95)
@@ -509,11 +531,11 @@ resumen_var <- data.frame(var95Real, var95P3, var95P4, var95P5, var95P6)
 
 resumen_var %>% kbl(
   col.names = c(
-    'VaR 95 Empírico',
-    'VaR 95 Poisson 3',
-    'VaR 95 Poisson 4',
-    'VaR 95 Poisson 5',
-    'VaR 95 Poisson 6'
+    'Empírico',
+    'Poisson 3',
+    'Poisson 4',
+    'Poisson 5',
+    'Poisson 6'
   ),
   digits = 2
 ) %>%
@@ -523,10 +545,11 @@ resumen_var %>% kbl(
   row_spec(0, bold = TRUE)
 ```
 
-
+Se observa que el VaR emírico con los datos reales es más alto que el VaR calculado con las simulaciones utilizando todas las mixturas de Poisson propuestas. Esto podría explicarse por el mal ajuste residual de la frecuencia y podría causar problemas en subestimación de pérdidas. 
 
 
 ### Ajuste del máximo
+
 
 ```{r}
 #| echo: false  
@@ -543,53 +566,74 @@ ext <- datos_maximo$max
 
 
 ```{r}
-#| layout-ncol: 1
 #| echo: false
 GEV <- fevd(ext, type='GEV')
-GEV_summary <- summary(GEV, silent=TRUE)
-plot(GEV)
 ```
+
+Para ajustar las distribuciones de valores extremos primero se filtran los datos por el pago máximo realizado en cada mes. Con estos datos se procede a hacer el ajuste de la distribución de valor extremo generalizada por medio de MLE. El parámetro de forma estimado es de $\text{shape}=0.4784$, lo que sugiere que la distribución está convergiendo a una Frechet. Se procede a hacer el ajuste para las distribuciones individualmente. 
 
 ```{r}
 #| echo: false
+
+#Gumbel
 Gumbel <- fevd(ext, type='Gumbel')
 Gumbel_summary <- summary(Gumbel, silent=TRUE)
-plot(Gumbel)
-```
 
-```{r}
-#| echo: false
-#| warning: false
+#Weibull
 Weibull <- fitdist(ext, distr = 'weibull')
-plot(Weibull)
-```
 
-```{r}
+#Frechet
+detach("package:extraDistr", unload = TRUE)
+library(evd)
 fit_frechet <- fitdist(
   ext,
   distr='frechet',
-  lower=c(0,0,0), 
-  start=list(loc=2528, scale=1079, shape=0.47)
+  lower=c(0,0,0), upper = c(Inf, Inf, Inf),
+  start=list(loc=100, scale=100, shape=0.9)
 )
 ```
 
+```{r}
+#| echo: false
+#| fig-cap-location: top
+#| fig-cap: Diagnósticos del ajuste de la distribución del máximo
+#| fig-subcap: 
+#|   - "pp-plot Frechet"
+#|   - "pp-plot Gumbel"
+#|   - "pp-plot Weibull"
+#|   - "qq-plot Frechet"
+#|   - "qq-plot Gumbel"
+#|   - "qq-plot Weibull"
+#| layout-ncol: 3
+#| label: fig-diagMax
 
-AIC 
+ppcomp(fit_frechet,main='')
+ppcomp(Weibull,main='')
+plot(Gumbel, type='probprob',col='red',main='')
+
+qqcomp(fit_frechet,main='')
+qqcomp(Weibull,main='')
+plot(Gumbel, type='qq',col='red',main='')
+
+```
 
 ```{r}
 #| echo: false
-GEV_summary$AIC
-Gumbel_summary$AIC
-Weibull$aic
-```
-BIC
+#| tbl-cap: "AIC y BIC para las distribuciones de valor extremo ajustadas"
+#| fig-cap-location: top
+#| label: tbl-diagMax
+Distribuciones <- c('Frechet', 'Gumbel', 'Weibull')
+AIC <- c(fit_frechet$aic, Gumbel_summary$AIC, Weibull$aic)
+BIC <- c(fit_frechet$bic, Gumbel_summary$BIC, Weibull$bic)
 
-```{r}
-#| echo: false
-GEV_summary$BIC
-Gumbel_summary$BIC
-Weibull$bic
+GOFextreme <- data.frame(Distribuciones, AIC, BIC)
+GOFextreme %>% kbl(digits = 2) %>%
+  kable_styling(latex_options = c("striped")) %>%
+  kable_styling(full_width = F) %>%
+  kable_classic_2() %>%
+  row_spec(0, bold = TRUE)
 ```
+
 
 
 
@@ -716,12 +760,38 @@ Weibull$bic
     complejos con la prueba planteada y solamente se aprecia esta de
     forma gráfica. Además, se prevee que se está cayendo es sobreajuste.
     
+12. **Nombre de Resultado**: Ajuste de la composición de frecuencia y severidad (S)
 
+    **Resumen en una oración**: Se hace una simulación de las pérdidas compuestas por la frecuencia y severidad y se encuentra que el promedio es similar, sin embargo parece subestimar la cola de las pérdidas. 
+    
+    **Principal característica**: Las distribuciones simuladas son consistentes a través de la mixturas de Poissones utilizadas y parecen tener una centralidad más a la derecha que la distribución original.
+    
+    **Problemas o posibles desafíos**: El VaR calculado con las simulaciones parece subestimar las empíricas con los datos originales. 
+    
+    **Resumen en un párrafo**: La @fig-DistS muestra las distribución de las pérdidas simuladas con cada mixtura de Poisson. Se nota consistencia entre ellos, sin embargo la forma parece ser distinta a la de los datos originales, más específicamente, parecen estar centradas más a la derecha. A pesar de que el promedio de las pérdidas simuladas y las originales es muy parecido, el VaR calculado con las simulaciones es más bajo que el empírico. Esto podría explicarse del hecho de que los datos originales muestran ocurrencias de pérdias anormalmente altas, como lo es el mes de enero del 2012.
     
     
-    
+12. **Nombre de Resultado**: Ajuste de las distribuciones de valor extremo 
 
-## Parte de escritura
+    **Resumen en una oración**: Los parámetros estimados por la GEV sugieren una Frechet y la comparación del ajuste individual de la Weibull, Gumbel y Frechet apoyan este hecho 
+    
+    **Principal característica**: El parámetro de forma de la GEV sugiere una Frechet. 
+    
+    **Problemas o posibles desafíos**: Ninguno en particular 
+    
+    **Resumen en un párrafo**:  Los parámetros estimados por la GEV sugieren una Frechet. Luego de hacer el ajuste individual a a los datos del máximo con la Weibull, Gumbel y Frechet se observa en tbl-diagMax que el AIC y BIC apoyan el uso de la Frechet. Más evidencia para este resultado se observa en @fig-diagMax que la Frechet se acomoda mejor en los datos, especialmente los dos valores más extremos que se desvían significativamente de las distribuciones teóricas en el caso de la Gumbel y Weibull, pero que es consistente con la Frechet.  
+
+## Parte de escritura 
+
+### Conclusión
+
+En esta investigación se buscaba modelar las pérdidas ligadas a los daños a la propiedad y a las personas en aeropuertos a partir de su frecuencia y severidad. La pregunta fue adoptada porque se buscaba tener un enfoque sobre el proceso de ajuste de la frecuencia y severidad con diferentes distribuciones más atípicas y con un fuerte émfasis en las pruebas de hipótesis de bondad de ajuste. Las expectivas previas eran de que el ajsute de la frecuencia sería más desafiante que el de la severidad basado en el trabajo de @flores, donde no se obtuvo un ajuste satisfactorio. El enfoque fue de hacer una composición entre la frecuencia de los reclamos y las severidades, donde cada componente fue ajustado individualmente usando MLE. 
+
+Las distribuciones candidatas surgieron de la literatura previa, donde se hacían investigaciones con datos similares y que se encontró que la lognormal ajustaba mejor a la severidad mientas que la binomial negativa y geométrica tuvieron los mejores resultados para la frecuencia. En comparación, en este trabajo se encontró que la mixtura de tres o más poissones resultaron en el mejor ajuste para la frecuencia, siendo la de tres la preferible pues se hayaron indicios de sobreajuste para las demás, aparte de la gran cantidad de parámetros que debían incorporarse. En general se encontró que el ajuste de la frecuencia fue más complejo y requirió técnicas más avanzadas. 
+
+Para la severidad se encontró que todas las distribuciones presentadas excepto la exponencial presentaron un ajuste satisfactorio, donde se daba un no rechazo a un nivel de significancia del 5% bajo las pruebas de Kolmogorov-Smirnov y Anderson Darling. Bajo una inspección holística de las medidas de bondad de ajuste se encontró que la gamma y la lognormal eran las más idóneas, siendo la primera la que finalmente se escogió bajo el criterio de AIC y BIC. Con la frecuencia y Severidad se llevó a cabo la composición de las pérdidas con simulaciones de tamaño mil. Se encontró que la distribución de las pérdidas parece consistente a través de todas las mixturas de Poisson intentadas y el VaR en cada caso resulta menor que el observado, posiblemente causado por el mal ajuste de la frecuencia. 
+
+Para una extensión de este trabajo se recomienda hacer una separación de por tipo de pérdidas, y con ello hacer un ajuste individual a cada uno, similarmente a lo que se presentó en este trabajo. Finalmente, las pérdidas totales se pueden construir utilizando cópulas. Esto puede resultar en una aproximación más fina de las pérdias totales y que se expone en trabajos similares, como el de @flores. Este trabajo proporciona una ajuste de la frecuencia más elaborado que el que se hizo en la literatura relacionada, y proporcionó resultados ligeramente más satisfactorios, por lo cual llega a llenar ese vació en la metodología implementada con este tipo de datos.  
 
 ###  Reestructuración de la introducción 
 
