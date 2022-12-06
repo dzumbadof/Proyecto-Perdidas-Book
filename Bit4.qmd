@@ -331,7 +331,7 @@ resultados = ""
 pruebas <- gofstat(modelo, discrete = TRUE)
 valor_p <- pruebas$chisqpvalue
 
-temp <- c(modelo$distname, round(modelo$aic,2), round(modelo$bic, 2), round(valor_p, 6))
+temp <- c(modelo$distname, round(modelo$aic,2), round(modelo$bic, 2), round(valor_p, 4))
 
 return(temp)
 }
@@ -345,8 +345,8 @@ tabla[,1] <- nombres_dists
 
 colnames(tabla) <- c("Distribución", "AIC", "BIC", "Valor $p$")
 
-tabla$`Valor $p$`[6] <- round(gofMezclaPoisson2$chisqpvalue, 6)
-tabla$`Valor $p$`[7] <- round(gofMezclaPoisson3$chisqpvalue, 6)
+tabla$`Valor $p$`[6] <- round(gofMezclaPoisson2$chisqpvalue, 4)
+tabla$`Valor $p$`[7] <- round(gofMezclaPoisson3$chisqpvalue, 4)
 tabla$`Valor $p$`[8] <- ""
 tabla$`Valor $p$`[9] <- ""
 
@@ -357,6 +357,24 @@ tabla$`Valor $p$`[9] <- ""
 
 Por último, en la @tbl-MetricasNuevasBit4 Bit4 se presentan los valores $p$ de la prueba chi-cuadrado y las medidas de AIC y  BIC para los modelos nuevos ajustados para la frecuencia.
 
+```{r}
+library(xtable)
+print(xtable(tabla, caption = "Título de la tabla", align = "lllll" , label = "etiqueta", digits = 2, include.rownames = FALSE, include.colnames = T, format.args = list(big.mark = c(","), decimal.mark = ".")))
+
+
+
+
+h <- 9
+w <- 1.6*h
+
+pdf(file = "Grafico ajustes mezclas.pdf",
+    width = w, 
+    height = h) 
+par(mar = c(5,7,0.5,0.5), cex.lab=2, cex.axis=2, cex.main=2, cex.sub=2, cex.leg=2)
+cdfcomp(list(fitMezclaPoisson4, fitMezclaPoisson6), main="", xlab="Datos de frecuencia", ylab = "Función de distribución", legend=c( "Mezcla 4 Poisson", "Mezcla 6 Poisson"), datacol = c("black"), fitcol = c("blue", "red"), fitlty = 1, xlegend = "topleft", cex=2)
+dev.off()
+
+```
 
 ```{r}
 #| tbl-cap: "Métricas de los modelos nuevos ajustados para la frecuencia"
