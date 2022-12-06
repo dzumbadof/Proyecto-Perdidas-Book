@@ -834,7 +834,7 @@ En este trabajo, se busca modelar las pérdidas ligadas a los daños a la propie
 
 **¿Cuál es su enfoque? ¿Cómo pretende descubrirlo?**
 
-Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad mediante distribuciones continuas, como de las frecuencias mediante distribuciones discretas tradicionales y adicionalmente mediante los métodos alternativos antes mencionados.Por último,  la implementación de métodos de selección de modelos.
+Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad mediante distribuciones continuas, como de las frecuencias mediante distribuciones discretas tradicionales y adicionalmente mediante los métodos alternativos antes mencionados. Por último,  se realiza la selección de modelos con pruebas de bondad de ajuste y los criterios de información de Akaike (AIC) y bayesiano (BIC).
 
 **Resumen: ¿Qué se trata en cada sección?**
 
@@ -873,17 +873,34 @@ Dada la problemática en el ajuste de la frecuencia, en este estudio se propone 
 
 En este trabajo, se busca modelar las pérdidas ligadas a los daños a la propiedad y a las personas en aeropuertos de Estados Unidos para el período 2010-2013, a partir de la frecuencia y severidad de estos.
 
-Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad mediante distribuciones continuas, como de las frecuencias mediante distribuciones discretas tradicionales y adicionalmente mediante los métodos alternativos antes mencionados.Por último,  la implementación de métodos de selección de modelos.
+Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad mediante distribuciones continuas, como de las frecuencias mediante distribuciones discretas tradicionales y adicionalmente mediante los métodos alternativos antes mencionados. Por último,  se realiza la selección de modelos con pruebas de bondad de ajuste y los criterios de información de Akaike (AIC) y bayesiano (BIC).
 
-El esquema del documento es el siguiente. En la sección Metodología, se describe con mayor detalle los datos utilizados y los métodos implementados para este proyecto. En la sección Resultados, se realiza un análisis de los resultados obtenidos tanto del ajuste de la frecuencia, la severidad, métodos de selección de modelos y modelo de pérdidas agregadas.En la sección  Conclusiones se presentan las conclusiones obtenidas mediante este estudio y las sugerencias para trabajos futuros.
+El esquema del documento es el siguiente. En la sección Metodología, se describe con mayor detalle los datos utilizados y los métodos implementados para este proyecto. En la sección Resultados, se realiza un análisis de los resultados obtenidos tanto del ajuste de la frecuencia, la severidad, métodos de selección de modelos y modelo de pérdidas agregadas. En la sección  Conclusiones se presentan las conclusiones obtenidas mediante este estudio y las sugerencias para trabajos futuros.
 
 
 
 
 #### Resultados
 
+
 ##### Frecuencia
 
+
+Respecto de el ajuste de la frecuencia, este resultó muy problemático. Se empezó por probar con las distribuciones discretas de la clase $(a,b,0)$ y $(a,b,1)$.
+
+En la @tbl-metricasFrecuencia se presenta el valor $p$ resultante de la prueba chi-cuadrado de bondad de ajuste. Se obtuvieron valores $p$ muy bajos en todos los casos, con lo que se rechaza la hipótesis de bondad de ajuste bajo los niveles de significancia usuales del $10\%$, $5\%$ y $1\%$, de modo que hay evidencia suficiente para rechazar la hipótesis de que la distribución de la frecuencia proviene de cualquiera de las propuestas.
+
+Posteriormente y buscando una mayor flexibilidad que permitiera conseguir un mejor ajuste, se se probó con las composiciones Poisson-Gaussiana inversa, Poisson-Geométrica (Distribución Polya-Aeppli) y Binomial negativa-Poisson (Delaporte). Sin embargo, nuevamente el ajuste no es adecuado. La flexibilidad que se perseguía al incorporar distribuciones más complejas no se refleja en un buen ajuste, como puede verse en la @tbl-MetricasNuevasBit4, donde los valores $p$ para estas distribuciones son muy bajos, de modo que debieron explorarse otras alternativas. Cabe mencionar que de las tres distribuciones, la Polya-Aeppli mereció un mayor valor $p$ en la prueba chi-cuadrado, sin llegar a ser este significativo, y mejores valores de AIC y BIC.
+
+Luego, se pensó que versiones discretas de distribuciones continuas podrían ser usadas para la modelización de la frecuencia. En este análisis nos centramos en las variaciones disponibles en el paquete \texttt{extraDistr} de \texttt{R}: la distribución Weibull discreta y la Gamma discreta. En este contexto, la discretización corresponde a que es la distribución de la parte entera de una variable aleatoria absolutamente continua. De la misma @tbl-MetricasNuevasBit4 se ve que estas opciones resultan las mejores opciones hasta el momento, sin embargo, no puede dejar de notarse que los valores $p$ son muy bajos, rechazándose así la hipótesis de bondad de ajuste bajo los niveles de significancia usuales. 
+
+Como un último intento de ajuste de la frecuencia y motivado por la forma del histograma en la Figura @fig-histograma_frecuencia surge la idea de probar con mezclas de distribuciones discretas, limitadas al caso de mezclas de tipo Poisson, probándose con mezclas dos, tres, cuatro y seis de estas. Visualmente y como puede corroborarse de las figuras [-@fig-ajusteMezclasPoisson23] y [-@fig-ajusteMezclasPoisson46], el ajuste que proporcionan las mezclas a partir de tres es muy superior al cualquier otro enfoque emprendido anteriormente. En términos de valor $p$ en la prueba chi-cuadrado, sin embargo, de la tabla @tbl-MetricasNuevasBit4 puede notarse que para la mezcla de tres Poissones el resultado no es bueno. 
+
+Además, obsérvese que en la tabla @tbl-MetricasNuevasBit4 no se muestran valores $p$ para los dos ajsutes que mejor lucen. Recuérdese que las mezclas tienen un nivel de complejidad creciente porque cada vez se requiere estimar una mayor cantidad de parámetros, para lo cual no se tiene una gran cantidad de datos (solo 48). Este hecho imposibilita una adecuada utilización de la prueba chi-cuadrado, ya que, con los datos de frecuencia de este trabajo, una cantidad que oscila entre los siete y ocho intervalos se requieren para garantizar que las frecuencias esperadas en cada intervalo sean iguales o superiores a cinco, lo cual constituye una regla empírica para el correcto funcionamiento de esta prueba estadística. De esta manera, con mezclas de cuatro y seis distribuciones, se tienen que estimar siete y once parámetros respectivamente, con lo cual, en la prueba chi-cuadrado de bondad de ajuste se tendrían grados de libertad negativos. En resumen, no se puede cuantificar la evidencia a favor de la bondad de ajuste de estos dos modelos más complejos con la prueba planteada y solamente se aprecia esta de forma gráfica. Adicionalmente, se prevee que se está cayendo es sobreajuste. Dicho esto, los criterios de información ubican a la mezcla de cuatro y seis distribuciones Poisson por encima de la de tres. 
+
+Aunque no se puede llevar a cabo el proceso de selección de modelos planteado en un inicio, con la prueba chi-cuadrado como un primer proceso de eliminación y luego con el AIC y BIC para determinar el mejor modelo, se decide retener para la modelización de la frecuencia las mezclas de distribuciones Poisson, que gráficamente resultaron las mejores. 
+    
+    
 ##### Severidad
 
 
