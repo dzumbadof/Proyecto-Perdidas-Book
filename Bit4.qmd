@@ -447,6 +447,7 @@ goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik',
   kable_classic_2() %>%
   row_spec(0,bold=TRUE)
 ```
+
 Para la prueba de Kolmogorov Smirnov, una significancia del 5% corresponde a un valor crítico de 0.196299, lo que excluye la exponencial, pero todas las demás son candidatas viables. Para la prueba de Anderson-Darling una significancia del 5% corresponde a un valor crítico de 2.492 lo que nuevamente rechaza la exponencial rotundamente pero deja todas las demás distribuciones como viables. Al observar el AIC y BIC vemos que la gamma proporciona el mejor ajuste con la log-normal muy cercana también. Bajo estas medidas y el principio de parsimonía se decide elegir la gamma como la distribución de la severidad. 
 
 ### Simulación de la S
@@ -879,6 +880,122 @@ El esquema del documento es el siguiente. En la sección Metodología, se descri
 
 
 
+#### Resultados
 
+##### Frecuencia
+
+##### Severidad
+
+
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: false
+#| fig-cap: "Densidad de las distribuciones ajustadas con MLE"
+#| label: fig-denscompSeveridad1
+
+plot.legend <- c('lnorm', 'exp', 'gamma', 'JSU', 'gLogis', 'Weibull')
+denscomp(list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, fit_weibull),
+         main = "", ylab = 'Función de densidad', xlab = 'Datos de severidad',
+         legendtext = plot.legend, cex=0.8)
+```
+
+```{r}
+#| echo: false
+#| fig-cap: "Función cumulativa de las distribuciones ajustadas con MLE"
+#| label: fig-cdfcompSeveridad1
+cdfcomp(cex=0.8, list(fit_lnorm, fit_exp, fit_gamma, fit_JSU, fit_glogis, 
+                      fit_weibull), main = "", xlab = 'Datos de severidad',
+        ylab = 'Función de distribución', legendtext = plot.legend)
+```
+
+La @fig-denscompSeveridad1 muestra las densidades estimadas contra los datos observados. Se puede apreciar que todas siguen una forma similar excepto por la exponencial, que muestra indicios de mal ajuste. La Weibull parece tener una medida de centralidad más alta que el resto, mientas que la logística muestra evidencia de tener una centralidad más baja. Sin embargo, todas aproximan bastante bien la distribución de los datos. @fig-cdfcompSeveridad1 muestra la función de distribución estimada contra la distribución empírica de los datos. Muestra evidencia que apoya lo que se había observado y todas las distribuciones candidatas muestran buen ajuste, al menos visualmente, y parecen capturar bien la distribución real de los datos, excepto por la exponencial que diverge significativamente del resto. 
+
+```{r}
+#| echo: false
+#| tbl-cap: "Métricas de bondad de ajuste de la severidad"
+#| label: tbl-metricasSeveridad
+#| tbl-pos: 'h'
+
+LogLik <- c(fit_lnorm$loglik, fit_exp$loglik, fit_gamma$loglik, 
+            fit_JSU$loglik, fit_glogis$loglik, fit_weibull$loglik)
+
+goft <- data.frame( dist = c('log-normal', 'exponencial', 'gamma', 
+                             'Johnson SU', 'glogis', 'Weibull'), 
+                    AIC = as.numeric(goftest$aic), 
+                    BIC = as.numeric(goftest$bic), 
+                    Loglik = LogLik, ad=as.numeric(goftest$ad), 
+                    ks = as.numeric(goftest$ks))
+
+goft %>% kbl(col.names = c('Distribución', 'AIC', 'BIC', 'LogLik', 
+                'Estad. AD', 'Estad. KS'), digits = 2) %>%#| fig-cap: "Densidad de las distribuciones ajustadas con MLE"
+#| label: fig-mayormontoaerolineas
+                 kable_styling(latex_options = c("striped"))%>%
+  kable_styling(full_width = F)%>%
+  kable_classic_2() %>%
+  row_spec(0,bold=TRUE)
+```
+
+@tbl-metricasSeveridad muestra los resultados de la pruebas de bondad de ajuste. Para la prueba de Kolmogorov Smirnov, una significancia del 5% corresponde a un valor crítico de 0.196299, lo que excluye la exponencial, pero todas las demás son candidatas viables. Para la prueba de Anderson-Darling, una significancia del 5% corresponde a un valor crítico de 2.492 lo que nuevamente rechaza la exponencial rotundamente pero deja todas las demás distribuciones como viables. Al observar el AIC y BIC vemos que la gamma proporciona el mejor ajuste con la log-normal muy cercana también. Bajo estas medidas se decide elegir la gamma como la distribución de la severidad, sin embargo cabe mencionar que la log-normal muestra suficiente evidencia de bondad de ajuste y se pudo haber escogido también.
+
+
+###### Composición de frecuencia y severidad
+
+```{r}
+#| echo: false
+#| fig-cap-location: top
+#| fig-cap: Distribución de las pérdidas simuladas utilizando mixturas de Poisson
+#| fig-subcap: 
+#|   - "3 Poissones"
+#|   - "4 Poissones"
+#|   - "5 Poissones"
+#|   - "6 Poissones"
+#| layout-ncol: 2
+#| label: fig-DistS1
+
+df <- data.frame(S3, S4, S5, S6)
+ggplot(df, aes(x=S3)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+ggplot(df, aes(x=S4)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+ggplot(df, aes(x=S5)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+ggplot(df, aes(x=S6)) + 
+  geom_histogram(colour="black", fill="#40A195", bins=16)+
+  xlab("Pérdidas")+ylab("Cantidad")
+```
+
+La @fig-DistS1 muestra las distribución de las pérdidas simuladas con cada mixtura de Poisson. Se nota consistencia entre ellos, sin embargo la forma parece ser distinta a la de los datos originales, más específicamente, parecen estar centradas más a la derecha. A pesar de que el promedio de las pérdidas simuladas y las originales es muy parecido, el VaR calculado con las simulaciones es más bajo que el empírico. Esto podría explicarse del hecho de que los datos originales muestran ocurrencias de pérdias anormalmente altas, como lo es el mes de enero del 2012. Una vez que se obtuvo la composición de la pérdidas simuladas se puede calcular el VaR al 95%. Se observa en @tbl-VaR1 que el VaR empírico con los datos reales es más alto que el VaR calculado con las simulaciones utilizando todas las mixturas de Poisson propuestas. Esto podría explicarse por el mal ajuste residual de la frecuencia y podría causar problemas de subestimación de pérdidas. 
+
+```{r}
+#| echo: false
+#| tbl-cap: Comparación del VaR al 95% con diferentes mixturas de la Poisson
+#| label: tbl-VaR1
+#| tbl-colwidths: [0.5,0.5,0.5,0.5,0.5]
+var95Real <- quantile(datos_agregados$X,0.95)
+var95P3 <- quantile(S3,0.95)
+var95P4 <- quantile(S4,0.95)
+var95P5 <- quantile(S5,0.95)
+var95P6 <- quantile(S6,0.95)
+
+resumen_var <- data.frame(var95Real, var95P3, var95P4, var95P5, var95P6)
+
+resumen_var %>% kbl(
+  col.names = c(
+    'Empírico',
+    'Poisson 3',
+    'Poisson 4',
+    'Poisson 5',
+    'Poisson 6'
+  ),
+  digits = 2
+) %>%
+  kable_styling(latex_options = c("striped")) %>%
+  kable_styling(full_width = F) %>%
+  kable_classic_2() %>%
+  row_spec(0, bold = TRUE)
+```
 
 
