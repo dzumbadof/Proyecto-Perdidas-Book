@@ -841,13 +841,6 @@ Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad 
 El esquema del documento es el siguiente. En la sección Metodología, se describe con mayor detalle los datos utilizados y los métodos implementados para este proyecto. En la sección Resultados, se realiza un análisis de los resultados obtenidos tanto del ajuste de la frecuencia, la severidad, métodos de selección de modelos y modelo de pérdidas agregadas.En la sección  Conclusiones se presentan las conclusiones obtenidas mediante este estudio y las sugerencias para trabajos futuros.
 
 
-### Resumen
-
-
-
-
-
-
 
 ### Ordenamiento de bitácora
 
@@ -878,7 +871,54 @@ Para esto se propone el ajuste vía máxima verosimilitud tanto de la severidad 
 El esquema del documento es el siguiente. En la sección Metodología, se describe con mayor detalle los datos utilizados y los métodos implementados para este proyecto. En la sección Resultados, se realiza un análisis de los resultados obtenidos tanto del ajuste de la frecuencia, la severidad, métodos de selección de modelos y modelo de pérdidas agregadas. En la sección  Conclusiones se presentan las conclusiones obtenidas mediante este estudio y las sugerencias para trabajos futuros.
 
 
+### Metodología
 
+
+
+Entre los métodos para la estimación de parámetros de las variables de frecuencia y severidad  se encuentran el método de ajuste paramétrico vía máxima verosimilitud. Tal como lo establece @klugman2019loss Defina $n$ el tamaño de una muestra aleatoria de la variable aleatoria $X$, la cual denotamos como $(x_{1},..., x_{n})$. Si la pdf de la variable aleatoria $X$ se define como $f (x_i; \theta)$ se define por tanto la log verosimilitud de la muestra como:
+
+$$\log L(\theta ; \boldsymbol{x})=\sum_{i=1}^{n} \log f\left(x_{i} ; \theta\right)$$
+
+El valor de $\theta$ que maximiza la expresión anterior es el estimador de máxima verosimilitud (MLE) de  $\theta$ y es denotado por $\hat{\theta}$.
+
+En ocasiones, los métodos paramétricos tradicionales como el mencionado anteriormente, no son suficientes para lograr un ajuste adecuado de los parámetros de una distribución, nuestro proyecto no estuvo exento de esta problemática al ajustar la frecuencia. Es por esta razón que fue necesario el uso de mixturas (o mezclas). 
+
+Los ajustes con mezclas se limitaron a combinaciones de dos, tres, cuatro y seis distribuciones de tipo Poisson. Debe señalarse un punto muy importante respecto a estas mezclas: requieren estimar muchos parámetros. Para explicar esta aseveración, téngase en cuenta que si $p(x;\lambda_{j})$ denota la función masa de probabilidad de una distribución tipo Poisson con parámetro $\lambda_{j}$, una mezcla de $d$ distribuciones tipo Poisson tiene función masa
+
+$$p(x;\lambda_{1},\dots, \lambda_{d}, \alpha_{1},\dots, \alpha_{d})=\sum_{j=1}^{d}
+\alpha_{j}\,p(x;\lambda_{j})$$
+
+para algunos pesos $\alpha_{j}$ que cumplen con ser positivos y sumar la unidad, y donde $\lambda_{j}>0$ para $j=1,\dots, d$. De este último hecho, se desprende que solamente es necesario estimar $d-1$ pesos, además de los $d$ parámetros $\lambda_{j}$, sumando un total de $2d-1$ parámetros a estimar.
+
+Cabe mencionar que para el ajuste de este tipo de mixturas se optó por seguir la reparametrización presente en @zucchini2009hidden, es decir $\eta_{j} =\ln (\lambda_{j})$ para $j=1,\dots, d$ y $\tau_{j}=\frac{\alpha_{j}}{1-\sum_{i=2}^{d}\alpha_{i}}$ para $j=2,\dots, d$. Esta permite maximizar la verosimilitud sin tener que contemplar las restricciones sobre los parámetros. Naturalmente, los parámetros originales se pueden recuperar como $\lambda_{j}=e^{\eta_{j} }$, $\alpha_{j}=\frac{e^{\eta_{j}}}{1+\sum_{i=2}^{d}e^{\eta_{i}}}$  y $\alpha_{1}=1-\sum_{i=2}^{d}\alpha_{i}$.
+
+
+
+Los análogos discretos de distribuciones continuas utilizadas en este trabajo corresponden a las distribuciones de la parte entera de distribuciones, esto es $\left \lfloor X\right \rfloor$ donde $X$ es una variable aleatoria continua.
+
+Las pruebas de bondad de ajuste son utilizadas de forma recurrente una vez ajustadas las distribuciones a los datos y estimados los parámetros respectivos con la finalidad de elegir entre las distribuciones que compiten entre sí. Estas pruebas adoptan la estructura de prueba de hipótesis donde la hipótesis nula consiste en que los datos siguen una distribución particular.Para este estudio se implementan las pruebas:Prueba de Kolmogorov-Smirnov, prueba Anderson-Darling y la prueba Chi-cuadrado. La hipótesis nula de estas tres pruebas consiste en que $F$ es la distribución verdadera de los datos. En lo sucesivo, $F_{n}$ denota la distribución empírica.
+
+Tal como se esteblece en @klugman2019loss si se define como $t$ el punto de truncamiento izquierdo($t=0$, en caso de no truncamiento) y u el punto de censura ($u= \infty$, en caso de no existir censura). La prueba de Kolmogorov Smirnov para datos individuales viene dada por:
+
+$$D=\max(\vert F_{n}(x) - F(x)\vert, \vert F_{n}(x^{-}) - F(x)\vert)$$
+
+Este valor se compara con un valor crítico de $\hat{k}$ con valores $\frac{1.22}{\sqrt{n}}, \frac{1.36}{\sqrt{n}}, \frac{1.63}{\sqrt{n}}$ para niveles de significancia dados por 0.01, 0,05 y 0,01 respectivamente, y donde se rechaza la hipótesis nula si $D>\hat{k}$.
+
+La prueba Anderson-Darling se define como:
+
+
+$$A^{2}=n \int_{t}^{u} \frac{\left[F_{n}(x)-F^{*}(x)\right]^{2}}{F^{*}(x)\left[1-F^{*}(x)\right]} f^{*}(x) d x$$
+
+Es decir,es un promedio ponderado de las diferencias al cuadrado entre la distribución del modelo y el empírico. Y los valores críticos para esta prueba son  de 1.933, 2.492 y 3.857 para $10\%$, $5\%$ y $1\%$ niveles de significancia, respectivamente.
+
+Como se expone en @klugman2019loss, una prueba chi-cuadrado de bondad de ajuste requiere datos agrupados en intervalos $[c_{j-1}, c_{j})$, $j=1,\dots, k$. Se define  $\hat{p}_j=F\left(c_j\right)-F\left(c_{j-1}\right)$ y $p_{n j}=F_n\left(c_j\right)-F_n\left(c_{j-1}\right)$. Luego se tienen $E_{j}=n\hat{p}_j$ y $O_{j}=p_{n j} n$ con las cantidades esperada y observada, respectivamente, de observaciones en el intervalor respectivamente. El estadístico de la prueba es $\chi^{2}=\frac{\sum_{j=1}^{k}(E_{j}-O_{j})^2}{E_{j}}$, el cual, bajo la hipótesis nula, se distribuye como una chi-cuadrado con grados de libertad $k-1-\textit{cantidad de parámetros del modelo}$.
+
+
+Para la obtención del modelo de pérdidas agregadas se procede a realizarlo mediante simulación utilizando el siguiente algoritmo presentado en @klugman2019loss: 
+
+Se simula un número de la frecuencia escogida que se llama $n$. Este es el número de eventos de pérdidas, seguido se toma una muestra de tamaño $n$ de la severidad escogida y se calcula la suma. Esta es la pérdida simulada de un mes. Finalemente, se repite el paso uno y dos hasta obtener el tamaño de muestra deseado, en este caso de 1000.
+
+Siguiendo este algoritmo se puede construir la pérdida simulada de 1000 meses como composición de la frecuencia y la severidad escogidas. 
 
 #### Resultados
 
