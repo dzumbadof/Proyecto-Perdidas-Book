@@ -1,0 +1,386 @@
+---
+title: "Código"
+---
+
+# Paquetes. 
+```{r echo=FALSE, message=FALSE, warning=TRUE}
+#| output: false
+#| warning: false
+
+library(readxl)
+library(kableExtra)
+library(readr)
+library(dplyr)
+library(janitor) # función clean_names()
+library(magrittr) # función %<>%
+library(stringr) # función str_replace
+library(lubridate)
+library(PerformanceAnalytics) # funciones skewness y kurtosis
+library(ggplot2)
+library(actuar)
+library(fitdistrplus)
+library(stats)
+library(cowplot) # mejorar el aspecto de los gráficos
+library(gamlss) #distribucion Johnson SU
+library(glogis) #distribucion logistica generalizada
+
+#Valores Extremos
+library(extRemes)
+library(evd)
+```
+
+# Carga de los datos
+
+```{r, warning=FALSE, message=FALSE}
+#| echo: false
+#| warning: false
+
+datos <- read_excel("claims-2010-2013.xlsx") %>%
+
+clean_names() # se limpian nombres columnas
+
+datos <- datos %>% mutate(date_received = ymd(date_received),
+
+close_amount = as.numeric(gsub("\\$", "", close_amount)))
+
+# Se fija la base de datos
+
+attach(datos)
+```
+
+# Transformación de los datos
+
+```{r, message=FALSE, warning=FALSE}
+#| echo: false
+
+# X: Severidad
+
+# N: Frecuencia
+
+# Se filtran los reclamos aprobados o en los que se llegó a un acuerdo
+
+datos_agregados <- datos %>% 
+  filter(disposition == "Settle" | disposition== "Approve in Full")
+
+datos_agregados <- datos_agregados %>% 
+  group_by("ano" = year(date_received), "mes" = month(date_received) ) %>% 
+  summarise(X = sum(close_amount), N = n(), mean_sev=mean(close_amount)) %>%
+  ungroup() %>% mutate(t = c(1:48), .before = X)
+
+```
+
+# Ajuste de la frecuencia
+
+```{r Ajuste Poisson-Gaussiana inversa, echo=FALSE, results=FALSE}
+fit_InvGauss <- fitdist(data = datos_agregados$N, distr = "poisinvgauss", method = "mle",  start = list(mean = 50, shape = 10))
+# gofstat(fit_InvGauss, discrete = TRUE)
+# cdfcomp(cex=0.8, fit_InvGauss)
+```
+
+```{r Ajuste Polya-Aeppli, echo=FALSE, results=FALSE}
+library(polyaAeppli) # Composición Poisson-Geométrica
+fit_PolyaAeppli <- fitdist(data = datos_agregados$N, distr = "PolyaAeppli", method = "mle",  start = list(lambda = 10, prob = 0.3), lower = c(0,0), upper = c(Inf,1))
+# cdfcomp(cex=0.8, fit_PolyaAeppli)
+# gofstat(fit_PolyaAeppli, discrete = TRUE)
+```
+
+```{r Delaporte, echo=FALSE, results=FALSE}
+library(gamlss.dist)
+fit_Delaporte <- fitdist(data = datos_agregados$N, distr = "DEL", method = "mle",  start = list(mu = 265, sigma = 75, nu = 0.6), lower = c(0,0,0), upper = c(Inf,Inf,1))
+
+# cdfcomp(fit_Delaporte)
+#  
+# gofstat(fit_Delaporte, discrete = TRUE)
+
+```
+
+
+```{r Ajuste Weibull discreta, echo=FALSE, results=FALSE}
+library(extraDistr)
+fit_WeibullDiscreta <- fitdist(data = datos_agregados$N, distr = "dweibull", method = "mle",  start = list(shape1 = 0.8, shape2 = 1), lower = c(0,0), upper = c(1,Inf))
+
+# cdfcomp(cex=0.8, fit_WeibullDiscreta)
+# gofstat(fit_WeibullDiscreta, discrete = TRUE)
+```
+
+```{r Ajuste Gamma discreta, echo=FALSE, results=FALSE}
+library(extraDistr)
+
+fit_GammaDiscreta <- fitdist(data = datos_agregados$N, distr = "dgamma", method = "mle",  start = list(shape=100, scale=32), lower = c(0,0), upper = c(Inf,Inf))
+
+# cdfcomp(fit_GammaDiscreta)
+# 
+# gofstat(fit_GammaDiscreta, discrete = TRUE)
+
+```
+
+
+```{r Funciones MLE mezcla Poisson}
+
+
+mllk <- function(wpar,x){ zzz <- w2n(wpar)
+        -sum(log(outer(x,zzz$lambda,dpois)%*%zzz$delta)) }
+
+n2w  <- function(lambda,delta)log(c(lambda,delta[-1]/(1-sum(delta[-1]))))
+w2n  <- function(wpar){m <- (length(wpar)+1)/2
+        lambda <- exp(wpar[1:m])
+        delta  <- exp(c(0,wpar[(m+1):(2*m-1)]))
+return(list(lambda=lambda,delta=delta/sum(delta))) }
+
+
+```
+
+```{r Mezcla 2 Poisson, echo=FALSE}
+wpar <- n2w(c(300,300),c(0.01, 0.99))
+datosN <- datos_agregados$N
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+lambda <- resultados$lambda
+
+alpha <- resultados$delta
+
+lambdaMezclaPoisson2<- lambda
+alphaMezclaPoisson2 <- alpha
+
+n <- length(datos_agregados$N)
+
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fitMezclaPoisson2 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+
+gofMezclaPoisson2 <- gofstat(fitMezclaPoisson2)
+gofMezclaPoisson2$chisqpvalue <- pchisq(gofMezclaPoisson2$chisq, df = length(gofMezclaPoisson2$chisqbreaks)+ 1 - 1 -length(alphaMezclaPoisson2)- length(lambdaMezclaPoisson2) + 1, lower.tail = FALSE)
+
+```
+
+```{r Mezcla 3 Poisson, echo=FALSE}
+
+wpar <- n2w(c(100,200,300),c(1,1,1)/3)
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+lambda <- resultados$lambda
+
+alpha <- resultados$delta
+
+lambdaMezclaPoisson3 <- lambda
+
+alphaMezclaPoisson3 <- alpha
+
+n <- length(datos_agregados$N)
+
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fitMezclaPoisson3 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+
+gofMezclaPoisson3 <- gofstat(fitMezclaPoisson3)
+gofMezclaPoisson3$chisqpvalue <- pchisq(gofMezclaPoisson3$chisq, df = length(gofMezclaPoisson3$chisqbreaks)+ 1 - 1 -length(alphaMezclaPoisson3)- length(lambdaMezclaPoisson3) + 1, lower.tail = FALSE)
+
+```
+
+```{r Mezcla 4 Poisson, echo=FALSE}
+wpar <- n2w(c(90,100,90,55),c(0.1,0.4,0.3,0.1)) 
+
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+lambda <- resultados$lambda
+
+alpha <- resultados$delta
+
+lambdaMezclaPoisson4 <- lambda
+
+alphaMezclaPoisson4 <- alpha
+
+n <- length(datos_agregados$N)
+
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fitMezclaPoisson4 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+
+```
+
+```{r Mezcla 6 Poisson, echo=FALSE}
+wpar <- n2w(c(80,90,100,100,90,80),c(0.05,0.2,0.3,0.3,0.1,0.05))# 6 P
+
+
+resultados <- w2n(nlm(mllk,wpar,datosN)$estimate)
+
+lambda <- resultados$lambda
+
+alpha <- resultados$delta
+
+lambdaMezclaPoisson6 <- lambda
+
+alphaMezclaPoisson6 <- alpha
+
+n <- length(datos_agregados$N)
+
+loglik <- sum(log(dmixpois(x = datos_agregados$N, lambda, alpha)) )
+k <- length(lambda) + length(alpha)-1
+bic <- -2*loglik+k*log(n) 
+aic <- -2*loglik+k*2 
+
+fitMezclaPoisson6 <- structure(list(estimate = list(lambda = lambda, alpha=alpha),
+                       method="mle", sd=NA, cor=NA, vcov=NA,
+                       loglik=0, aic=aic, bic=bic, n=n, data=datos_agregados$N, fix.arg = NULL, fix.arg.fun = NULL, dots=NULL, convergence=0, discrete=TRUE,weights=NULL ,distname="mixpois"), class = "fitdist")   
+
+```
+
+
+```{r, echo=FALSE}
+
+dist_frec2 <- list(fit_InvGauss, fit_PolyaAeppli, fit_Delaporte,
+fit_WeibullDiscreta, fit_GammaDiscreta, fitMezclaPoisson2, fitMezclaPoisson3,
+fitMezclaPoisson4, fitMezclaPoisson6)
+
+
+arreglo_de_metricas <- function(modelo){
+par <- modelo$estimate
+resultados = ""
+pruebas <- gofstat(modelo, discrete = TRUE)
+valor_p <- pruebas$chisqpvalue
+
+temp <- c(modelo$distname, round(modelo$aic,2), round(modelo$bic, 2), round(valor_p, 6))
+
+return(temp)
+}
+
+tabla <- cbind(sapply(dist_frec2, arreglo_de_metricas)) %>% t() %>% as.data.frame() 
+
+nombres_dists <- c("Poisson-Gaussiana inversa", "Polya-Aeppli", "Delaporte",
+"Weibull discreta", "Gamma discreta", "Mezcla 2 Poisson", "Mezcla 3 Poisson", "Mezcla 4 Poisson", "Mezcla 6 Poisson")
+
+tabla[,1] <- nombres_dists
+
+colnames(tabla) <- c("Distribución", "AIC", "BIC", "Valor $p$")
+
+tabla$`Valor $p$`[6] <- round(gofMezclaPoisson2$chisqpvalue, 6)
+tabla$`Valor $p$`[7] <- round(gofMezclaPoisson3$chisqpvalue, 6)
+tabla$`Valor $p$`[8] <- ""
+tabla$`Valor $p$`[9] <- ""
+
+
+
+```
+
+
+
+# Ajuste de la severidad
+
+```{r}
+#| echo: false
+#| warning: false
+
+X <- datos_agregados$mean_sev
+
+fit_lnorm <- fitdist(data = X, distr = "lnorm", method = "mle")
+
+fit_exp <- fitdist(data = X, distr = "exp", method = "mle")
+
+fit_gamma <- fitdist(data = X, distr = "gamma", method = "mle")
+
+fit_JSU <- fitdist(data = X, distr = 'JSU', method = "mle", 
+                   start=list(mu=0.3, sigma=1, nu=1,tau=0.4), 
+                   lower = c(-Inf, 0,-Inf,0), upper = rep(Inf, 4) )
+
+fit_glogis <- fitdist(data = X, distr = 'glogis', method = "mle",
+                      start=list(location=0.2, scale=1, shape=1))
+
+fit_weibull <- fitdist(data = X, distr = 'weibull', method = "mle")
+```
+
+Pruebas de bondad de ajuste. 
+
+```{r}
+#| echo: false  
+
+goftest <- gofstat(list(fit_lnorm, fit_exp, fit_gamma, 
+                        fit_JSU, fit_glogis, fit_weibull))
+
+```
+
+# Simulación de la S 
+
+```{r}
+p3 <- rmixpois(
+  n = 10000,
+  lambda = fitMezclaPoisson3$estimate$lambda,
+  alpha = fitMezclaPoisson3$estimate$alpha
+)
+
+p4 <- rmixpois(
+  n = 10000,
+  lambda = fitMezclaPoisson4$estimate$lambda,
+  alpha = fitMezclaPoisson4$estimate$alpha
+)
+
+p5 <- rmixpois(
+  n = 10000,
+  lambda = fitMezclaPoisson4$estimate$lambda,
+  alpha = fitMezclaPoisson4$estimate$alpha
+)
+
+p6 <- rmixpois(
+  n = 10000,
+  lambda = fitMezclaPoisson4$estimate$lambda,
+  alpha = fitMezclaPoisson4$estimate$alpha
+)
+shape=as.numeric(fit_gamma$estimate[1])
+rate=as.numeric(fit_gamma$estimate[2])
+
+S3 = rep(NA,1000); S4 = rep(NA,1000); S5 = rep(NA,1000); S6 = rep(NA,1000)
+for(i in 1:1000){
+  S3[i] <- sum(rgamma(p3[i],shape,rate))
+  S4[i] <- sum(rgamma(p4[i],shape,rate))
+  S5[i] <- sum(rgamma(p5[i],shape,rate))
+  S6[i] <- sum(rgamma(p6[i],shape,rate))
+}
+```
+
+# VaR
+
+```{r}
+#| echo: false
+#| tbl-cap: Comparación del VaR al 95% con diferentes mixturas de la Poisson
+#| label: tbl-VaR
+#| tbl-colwidths: [0.5,0.5,0.5,0.5,0.5]
+var95Real <- quantile(datos_agregados$X,0.95)
+var95P3 <- quantile(S3,0.95)
+var95P4 <- quantile(S4,0.95)
+var95P5 <- quantile(S5,0.95)
+var95P6 <- quantile(S6,0.95)
+
+resumen_var <- data.frame(var95Real, var95P3, var95P4, var95P5, var95P6)
+
+resumen_var %>% kbl(
+  col.names = c(
+    'Empírico',
+    'Poisson 3',
+    'Poisson 4',
+    'Poisson 5',
+    'Poisson 6'
+  ),
+  digits = 2
+) %>%
+  kable_styling(latex_options = c("striped")) %>%
+  kable_styling(full_width = F) %>%
+  kable_classic_2() %>%
+  row_spec(0, bold = TRUE)
+```
